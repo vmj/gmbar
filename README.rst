@@ -21,6 +21,15 @@ how much is cached.  Following shows a typical invocation::
                --width=100 --height=10 --margin=1 --padding=1 \
                --fg=red --used=red --buffers=yellow --cached=orange
 
+The program gmcpubar produces a system CPU bar, showing how much CPU
+time is used in system, user, nice, and idle tasks.  Following shows a
+typical invocation::
+
+    $ gmcpubar --interval=1 --logfile=gmcpubar.log \
+               --width=100 --height=10 --margin=1 --padding=1 \
+               --fg=red --kern=red --user=orange --nice=yellow \
+               --idle=green
+
 The included C library provides the ability to make custom graphical
 multibars easily easily.
 
@@ -35,7 +44,7 @@ portability.  Take this as a challenge.
 Installation
 ============
 
-Type 'make' and copy the 'gmmembar' to a convenient place, like ~/bin.
+Type 'make' and copy the 'gm{mem,cpu}bar' to a convenient place, like ~/bin.
 
 
 Authors
