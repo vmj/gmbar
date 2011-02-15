@@ -137,19 +137,19 @@ main(int argc, char** argv)
                 return -1;
         }
 
-        err = gmbar_add_section(bar, 0, strdup("red"));
+        err = gmbar_add_section(bar, strdup("red"));
         if (err)
         {
                 gmbar_free(bar);
                 return -1;
         }
-        err = gmbar_add_section(bar, 0, strdup("orange"));
+        err = gmbar_add_section(bar, strdup("orange"));
         if (err)
         {
                 gmbar_free(bar);
                 return -1;
         }
-        err = gmbar_add_section(bar, 0, strdup("yellow"));
+        err = gmbar_add_section(bar, strdup("yellow"));
         if (err)
         {
                 gmbar_free(bar);
@@ -185,9 +185,9 @@ main(int argc, char** argv)
                         return err;
                 }
 
-                (bar->sections[0])->width = bar->size.width * ((double)used / (double)total);
-                (bar->sections[1])->width = bar->size.width * ((double)buffers / (double)total);
-                (bar->sections[2])->width = bar->size.width * ((double)cached / (double)total);
+                gmbar_set_section_width(bar->sections[0], total, used);
+                gmbar_set_section_width(bar->sections[1], total, buffers);
+                gmbar_set_section_width(bar->sections[2], total, cached);
 
                 buf = gmbar_format(bar, 0);
                 if (buf)

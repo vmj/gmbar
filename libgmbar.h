@@ -43,6 +43,8 @@ struct gmcolor {
  */
 typedef struct gmsection gmsection;
 struct gmsection {
+        /** Container */
+        void* bar;
         /** Width of the section */
         unsigned int width;
         /** Color of the section */
@@ -73,12 +75,10 @@ gmbar*           gmbar_new                    ();
 void             gmbar_free                   (gmbar* bar);
 
 int              gmbar_add_section            (gmbar* bar,
-                                               unsigned int width,
                                                char* color);
-int              gmbar_add_section_by_value   (gmbar* bar,
+void             gmbar_set_section_width      (gmsection* section,
                                                unsigned int total,
-                                               unsigned int value,
-                                               char* color);
+                                               unsigned int value);
 
 char*            gmbar_format                 (gmbar* bar,
                                                unsigned int nl);

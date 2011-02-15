@@ -62,12 +62,11 @@ gmbar_free(gmbar* bar)
  *
  * On successful execution, takes ownership of the @color pointer.
  *
- * @param   width   Width of the section
  * @param   color   Color of the section.
  * @return  Zero on success, non-zero on failure.
  */
 int
-gmbar_add_section(gmbar* bar, unsigned int width, char* color)
+gmbar_add_section(gmbar* bar, char* color)
 {
         gmsection* section = (gmsection*) malloc(sizeof(gmsection));
         if (section)
@@ -82,7 +81,8 @@ gmbar_add_section(gmbar* bar, unsigned int width, char* color)
                         }
                         bar->sections = sections;
                         bar->sections[bar->nsections] = section;
-                        section->width = width;
+                        section->bar   = bar;
+                        section->width = 0;
                         section->color = color;
                         bar->nsections++;
                 }
@@ -97,19 +97,19 @@ gmbar_add_section(gmbar* bar, unsigned int width, char* color)
 }
 
 /**
- * Adds a new section to the bar.
+ * Sets a section width given a value.
  *
- * On successful execution, takes ownership of the @color pointer.
- *
- * @param   width   Width of the section
- * @param   color   Color of the section.
- * @return  Zero on success, non-zero on failure.
+ * @param   total   Total value
+ * @param   value   Value
  */
-int
-gmbar_add_section_by_value(gmbar* bar, unsigned int total, unsigned int value, char* color)
+void
+gmbar_set_section_width(gmsection* section, unsigned int total, unsigned int value)
 {
-        unsigned int width = (unsigned int) bar->size.width * ((double)value / total);
-        return gmbar_add_section(bar, width, color);
+        gmbar* bar = (gmbar*)section->bar;
+        unsigned int inner_width = (unsigned int) (bar->size.width
+                                                   - bar->margin.left - bar->margin.right
+                                                   - bar->padding.left - bar->padding.right);
+        section->width = inner_width * ((double)value / total);
 }
 
 /**
