@@ -154,11 +154,15 @@ gmbar_format(gmbar* bar, unsigned int nl)
                 size -= written;
 
                 /* draw the sections */
-                for (i = 0, section = NULL;
+                for (i = 0, section = NULL, written = 0;
                      i < bar->nsections && (section = bar->sections[i]) && size > 0;
-                     i++, width -= section->width, nchars += written, size -= written)
+                     i++, width -= section->width, nchars += written, size -= written, written = 0)
                 {
-                        if (strcmp(section->color, "none") == 0)
+                        if (section->width == 0)
+                        {
+                                // nothing to do
+                        }
+                        else if (strcmp(section->color, "none") == 0)
                         {
                                 written = snprintf(&buf[nchars], size, "^p(%u)", section->width);
                         }
