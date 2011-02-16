@@ -44,7 +44,8 @@ portability.  Take this as a challenge.
 Installation
 ============
 
-Type 'make' and copy the 'gm{mem,cpu}bar' to a convenient place, like ~/bin.
+Type 'make' and copy the 'bin/gm{mem,cpu}bar' to a convenient place,
+like ~/bin.
 
 
 Authors
