@@ -158,6 +158,8 @@ gmbar_format(gmbar* bar, unsigned int nl)
                      i < bar->nsections && (section = bar->sections[i]) && size > 0;
                      i++, width -= section->width, nchars += written, size -= written)
                 {
+                        if (strcmp(section->color, "none") == 0)
+                                continue;
                         written = snprintf(&buf[nchars], size, "^fg(%s)^r(%ux%u)",
                                            section->color,
                                            section->width,
