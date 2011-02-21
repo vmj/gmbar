@@ -21,6 +21,35 @@ gmbar_new()
 }
 
 /**
+ * Creates a new gmbar.
+ *
+ * @param   width    Width
+ * @param   height   Height
+ * @param   fg       Foreground color
+ * @param   bg       Background color
+ * @return  A newly allocated gmbar or NULL if there was not enought memory
+ *          to allocate one.
+ */
+gmbar*
+gmbar_new_with_defaults(unsigned int width, unsigned int height, char* fg, char* bg)
+{
+        gmbar* bar = gmbar_new();
+        if (bar)
+        {
+                bar->size.width  = width;
+                bar->size.height = height;
+                bar->color.fg = strdup(fg);
+                bar->color.bg = strdup(bg);
+                if (!bar->color.fg || !bar->color.bg)
+                {
+                        gmbar_free(bar);
+                        bar = NULL;
+                }
+        }
+        return bar;
+}
+
+/**
  *
  */
 void

@@ -72,6 +72,10 @@ struct gmbar {
 
 
 gmbar*           gmbar_new                    ();
+gmbar*           gmbar_new_with_defaults      (unsigned int width,
+                                               unsigned int height,
+                                               char* fg,
+                                               char* bg);
 void             gmbar_free                   (gmbar* bar);
 
 int              gmbar_add_section            (gmbar* bar,

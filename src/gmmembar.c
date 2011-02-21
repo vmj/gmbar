@@ -123,26 +123,9 @@ main(int argc, char** argv)
         gmbar* bar = NULL;
         char* buf = NULL;
 
-        bar = gmbar_new();
+        bar = gmbar_new_with_defaults(100, 10, "red", "#444444");
         if (!bar)
         {
-                return -1;
-        }
-
-        bar->size.width = 100;
-        bar->size.height = 10;
-
-        bar->color.fg = strdup("red");
-        if (!bar->color.fg)
-        {
-                gmbar_free(bar);
-                return -1;
-        }
-
-        bar->color.bg = strdup("#444444");
-        if (!bar->color.bg)
-        {
-                gmbar_free(bar);
                 return -1;
         }
 
