@@ -57,13 +57,15 @@ enum {
         OPTION_BACKGROUND_COLOR = 'B',
         OPTION_MARGIN = 'm',
         OPTION_PADDING = 'p',
-        OPTION_USED_COLOR = 'a',
-        OPTION_BUFFERS_COLOR = 'b',
-        OPTION_CACHED_COLOR = 'c',
         OPTION_UPDATE_INTERVAL = 'i',
         OPTION_LOG_FILE = 'L',
         OPTION_PREFIX = 'P',
         OPTION_SUFFIX = 'S',
+
+        /* Command specific options */
+        OPTION_USED_COLOR = 'a',
+        OPTION_BUFFERS_COLOR = 'b',
+        OPTION_CACHED_COLOR = 'c',
 };
 
 
@@ -91,12 +93,6 @@ static struct argp_option options[] = {
           "Margin size in pixels, all four sides"               },
         { "padding",    OPTION_PADDING,            "PADDING",   0,
           "Padding size in pizels, all four sides"              },
-        { "used",       OPTION_USED_COLOR,         "COLOR",     0,
-          "Color for the memory used portion of the bar"        },
-        { "buffers",    OPTION_BUFFERS_COLOR,      "COLOR",     0,
-          "Color for the buffers portion of the bar"            },
-        { "cached",     OPTION_CACHED_COLOR,       "COLOR",     0,
-          "Color for the disk cache portion of the bar"         },
         { "interval",   OPTION_UPDATE_INTERVAL,    "SECONDS",   0,
           "Polling intetrval in seconds (zero disables polling)"},
         { "logfile",    OPTION_LOG_FILE,           "LOGFILE",   0,
@@ -105,6 +101,15 @@ static struct argp_option options[] = {
           "Prefix to print before the bar"                      },
         { "suffix",     OPTION_SUFFIX,             "SUFFIX",    0,
           "Suffix to print after the bar"                       },
+
+        /* Command specific options */
+        { "used",       OPTION_USED_COLOR,         "COLOR",     0,
+          "Color for the memory used portion of the bar"        },
+        { "buffers",    OPTION_BUFFERS_COLOR,      "COLOR",     0,
+          "Color for the buffers portion of the bar"            },
+        { "cached",     OPTION_CACHED_COLOR,       "COLOR",     0,
+          "Color for the disk cache portion of the bar"         },
+
         { 0 }
 };
 
@@ -320,42 +325,6 @@ handle_option(int key, char* arg, struct argp_state *state)
                 config->bar->padding.bottom = int_value;
                 config->bar->padding.left = int_value;
                 break;
-        case OPTION_USED_COLOR:
-                if (config->bar->sections[0]->color)
-                {
-                        free(config->bar->sections[0]->color);
-                        config->bar->sections[0]->color = NULL;
-                }
-                config->bar->sections[0]->color = strdup(arg);
-                if (!config->bar->sections[0]->color)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_BUFFERS_COLOR:
-                if (config->bar->sections[1]->color)
-                {
-                        free(config->bar->sections[1]->color);
-                        config->bar->sections[1]->color = NULL;
-                }
-                config->bar->sections[1]->color = strdup(arg);
-                if (!config->bar->sections[1]->color)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_CACHED_COLOR:
-                if (config->bar->sections[2]->color)
-                {
-                        free(config->bar->sections[2]->color);
-                        config->bar->sections[2]->color = NULL;
-                }
-                config->bar->sections[2]->color = strdup(arg);
-                if (!config->bar->sections[2]->color)
-                {
-                        err = ENOMEM;
-                }
-                break;
         case OPTION_UPDATE_INTERVAL:
                 int_value = parse_unsigned_int(arg);
                 config->interval = int_value;
@@ -392,6 +361,44 @@ handle_option(int key, char* arg, struct argp_state *state)
                 }
                 config->suffix = strdup(arg);
                 if (!config->suffix)
+                {
+                        err = ENOMEM;
+                }
+                break;
+
+        /* Command specific options */
+        case OPTION_USED_COLOR:
+                if (config->bar->sections[0]->color)
+                {
+                        free(config->bar->sections[0]->color);
+                        config->bar->sections[0]->color = NULL;
+                }
+                config->bar->sections[0]->color = strdup(arg);
+                if (!config->bar->sections[0]->color)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_BUFFERS_COLOR:
+                if (config->bar->sections[1]->color)
+                {
+                        free(config->bar->sections[1]->color);
+                        config->bar->sections[1]->color = NULL;
+                }
+                config->bar->sections[1]->color = strdup(arg);
+                if (!config->bar->sections[1]->color)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_CACHED_COLOR:
+                if (config->bar->sections[2]->color)
+                {
+                        free(config->bar->sections[2]->color);
+                        config->bar->sections[2]->color = NULL;
+                }
+                config->bar->sections[2]->color = strdup(arg);
+                if (!config->bar->sections[2]->color)
                 {
                         err = ENOMEM;
                 }

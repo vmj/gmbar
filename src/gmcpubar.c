@@ -58,14 +58,16 @@ enum {
         OPTION_BACKGROUND_COLOR = 'B',
         OPTION_MARGIN = 'm',
         OPTION_PADDING = 'p',
-        OPTION_KERN_COLOR = 'a',
-        OPTION_USER_COLOR = 'b',
-        OPTION_NICE_COLOR = 'c',
-        OPTION_IDLE_COLOR = 'd',
         OPTION_UPDATE_INTERVAL = 'i',
         OPTION_LOG_FILE = 'L',
         OPTION_PREFIX = 'P',
         OPTION_SUFFIX = 'S',
+
+        /* Command specific options */
+        OPTION_KERN_COLOR = 'a',
+        OPTION_USER_COLOR = 'b',
+        OPTION_NICE_COLOR = 'c',
+        OPTION_IDLE_COLOR = 'd',
 };
 
 
@@ -93,14 +95,6 @@ static struct argp_option options[] = {
           "Margin size in pixels, all four sides"               },
         { "padding",    OPTION_PADDING,            "PADDING",   0,
           "Padding size in pizels, all four sides"              },
-        { "kern",       OPTION_KERN_COLOR,         "COLOR",     0,
-          "Color for the kernel portion of the bar"             },
-        { "user",       OPTION_USER_COLOR,         "COLOR",     0,
-          "Color for the user portion of the bar"               },
-        { "nice",       OPTION_NICE_COLOR,         "COLOR",     0,
-          "Color for the nice portion of the bar"               },
-        { "idle",       OPTION_IDLE_COLOR,         "COLOR",     0,
-          "Color for the idle portion of the bar"               },
         { "interval",   OPTION_UPDATE_INTERVAL,    "SECONDS",   0,
           "Polling intetrval in seconds (zero disables polling)"},
         { "logfile",    OPTION_LOG_FILE,           "LOGFILE",   0,
@@ -109,6 +103,17 @@ static struct argp_option options[] = {
           "Prefix to print before the bar"                      },
         { "suffix",     OPTION_SUFFIX,             "SUFFIX",    0,
           "Suffix to print after the bar"                       },
+
+        /* Command specific options */
+        { "kern",       OPTION_KERN_COLOR,         "COLOR",     0,
+          "Color for the kernel portion of the bar"             },
+        { "user",       OPTION_USER_COLOR,         "COLOR",     0,
+          "Color for the user portion of the bar"               },
+        { "nice",       OPTION_NICE_COLOR,         "COLOR",     0,
+          "Color for the nice portion of the bar"               },
+        { "idle",       OPTION_IDLE_COLOR,         "COLOR",     0,
+          "Color for the idle portion of the bar"               },
+
         { 0 }
 };
 
@@ -365,6 +370,48 @@ handle_option(int key, char* arg, struct argp_state *state)
                 config->bar->padding.bottom = int_value;
                 config->bar->padding.left = int_value;
                 break;
+        case OPTION_UPDATE_INTERVAL:
+                int_value = parse_unsigned_int(arg, NULL);
+                config->interval = int_value;
+                break;
+        case OPTION_LOG_FILE:
+                if (config->log_file)
+                {
+                        free(config->log_file);
+                        config->log_file = NULL;
+                }
+                config->log_file = strdup(arg);
+                if (!config->log_file)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_PREFIX:
+                if (config->prefix)
+                {
+                        free(config->prefix);
+                        config->prefix = NULL;
+                }
+                config->prefix = strdup(arg);
+                if (!config->prefix)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_SUFFIX:
+                if (config->suffix)
+                {
+                        free(config->suffix);
+                        config->suffix = NULL;
+                }
+                config->suffix = strdup(arg);
+                if (!config->suffix)
+                {
+                        err = ENOMEM;
+                }
+                break;
+
+        /* Command specific options */
         case OPTION_KERN_COLOR:
                 if (config->bar->sections[0]->color)
                 {
@@ -409,46 +456,6 @@ handle_option(int key, char* arg, struct argp_state *state)
                 }
                 config->bar->sections[3]->color = strdup(arg);
                 if (!config->bar->sections[3]->color)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_UPDATE_INTERVAL:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->interval = int_value;
-                break;
-        case OPTION_LOG_FILE:
-                if (config->log_file)
-                {
-                        free(config->log_file);
-                        config->log_file = NULL;
-                }
-                config->log_file = strdup(arg);
-                if (!config->log_file)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_PREFIX:
-                if (config->prefix)
-                {
-                        free(config->prefix);
-                        config->prefix = NULL;
-                }
-                config->prefix = strdup(arg);
-                if (!config->prefix)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_SUFFIX:
-                if (config->suffix)
-                {
-                        free(config->suffix);
-                        config->suffix = NULL;
-                }
-                config->suffix = strdup(arg);
-                if (!config->suffix)
                 {
                         err = ENOMEM;
                 }
