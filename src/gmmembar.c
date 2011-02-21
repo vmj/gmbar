@@ -62,6 +62,8 @@ enum {
         OPTION_CACHED_COLOR = 'c',
         OPTION_UPDATE_INTERVAL = 'i',
         OPTION_LOG_FILE = 'L',
+        OPTION_PREFIX = 'P',
+        OPTION_SUFFIX = 'S',
 };
 
 
@@ -71,6 +73,8 @@ struct arguments {
         gmbar* bar;
         unsigned int interval;
         char* log_file;
+        char* prefix;
+        char* suffix;
 };
 
 /* Options */
@@ -97,6 +101,10 @@ static struct argp_option options[] = {
           "Polling intetrval in seconds (zero disables polling)"},
         { "logfile",    OPTION_LOG_FILE,           "LOGFILE",   0,
           "Log debug messages to file"                          },
+        { "prefix",     OPTION_PREFIX,             "PREFIX",    0,
+          "Prefix to print before the bar"                      },
+        { "suffix",     OPTION_SUFFIX,             "SUFFIX",    0,
+          "Suffix to print after the bar"                       },
         { 0 }
 };
 
@@ -159,6 +167,8 @@ main(int argc, char** argv)
         config.bar = bar;
         config.interval = 15;
         config.log_file = NULL;
+        config.prefix = NULL;
+        config.suffix = NULL;
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
         if (err)
         {
@@ -192,7 +202,22 @@ main(int argc, char** argv)
                 buf = gmbar_format(bar, 0);
                 if (buf)
                 {
-                        printf("%s\n", buf);
+                        if (config.prefix && config.suffix)
+                        {
+                                printf("%s%s%s\n", config.prefix, buf, config.suffix);
+                        }
+                        else if (config.prefix)
+                        {
+                                printf("%s%s\n", config.prefix, buf);
+                        }
+                        else if (config.suffix)
+                        {
+                                printf("%s%s\n", buf, config.suffix);
+                        }
+                        else
+                        {
+                                printf("%s\n", buf);
+                        }
                         free(buf);
                         buf = NULL;
                 }
@@ -343,6 +368,30 @@ handle_option(int key, char* arg, struct argp_state *state)
                 }
                 config->log_file = strdup(arg);
                 if (!config->log_file)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_PREFIX:
+                if (config->prefix)
+                {
+                        free(config->prefix);
+                        config->prefix = NULL;
+                }
+                config->prefix = strdup(arg);
+                if (!config->prefix)
+                {
+                        err = ENOMEM;
+                }
+                break;
+        case OPTION_SUFFIX:
+                if (config->suffix)
+                {
+                        free(config->suffix);
+                        config->suffix = NULL;
+                }
+                config->suffix = strdup(arg);
+                if (!config->suffix)
                 {
                         err = ENOMEM;
                 }
