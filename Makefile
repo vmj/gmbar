@@ -15,7 +15,7 @@ help:
 src/libgmbar.o: src/libgmbar.h src/libgmbar.c
 	$(CC) $(CFLAGS) -o src/libgmbar.o -c src/libgmbar.c
 
-bin/%: src/%.c src/libgmbar.o
+bin/%: src/%.c src/libgmbar.o src/version.h
 	-@mkdir bin 2>/dev/null || true
 	$(CC) $(CFLAGS) -o src/$*.o -c $<
 	$(CC) $(LDFLAGS) -o $@ src/$*.o src/libgmbar.o
