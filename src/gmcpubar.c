@@ -136,25 +136,7 @@ main(int argc, char** argv)
                 return -1;
         }
 
-        err = gmbar_add_section(bar, strdup("red"));
-        if (err)
-        {
-                gmbar_free(bar);
-                return -1;
-        }
-        err = gmbar_add_section(bar, strdup("orange"));
-        if (err)
-        {
-                gmbar_free(bar);
-                return -1;
-        }
-        err = gmbar_add_section(bar, strdup("yellow"));
-        if (err)
-        {
-                gmbar_free(bar);
-                return -1;
-        }
-        err = gmbar_add_section(bar, strdup("green"));
+        err = gmbar_add_sections(bar, 4, "red", "orange", "yellow", "green");
         if (err)
         {
                 gmbar_free(bar);

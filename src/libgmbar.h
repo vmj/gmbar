@@ -80,6 +80,9 @@ void             gmbar_free                   (gmbar* bar);
 
 int              gmbar_add_section            (gmbar* bar,
                                                char* color);
+int              gmbar_add_sections           (gmbar* bar,
+                                               unsigned int nsections,
+                                               ...);
 void             gmbar_set_section_width      (gmsection* section,
                                                unsigned int total,
                                                unsigned int value);

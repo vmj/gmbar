@@ -1,4 +1,5 @@
 #include "libgmbar.h"
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -123,6 +124,40 @@ gmbar_add_section(gmbar* bar, char* color)
         }
 
         return section ? 0 : -1;
+}
+
+/**
+ * Adds new sections to the bar.
+ *
+ * @param   nsections   Number of sections
+ * @param   ...         Colors for the sections (const char*)
+ * @return  Zero on success, non-zero on failure
+ */
+int
+gmbar_add_sections(gmbar* bar, unsigned int nsections, ...)
+{
+        int err = 0;
+        unsigned int i = 0;
+        char* color = NULL;
+        va_list argv;
+        va_start(argv, nsections);
+        for ( ; i < nsections; i++ )
+        {
+                color = va_arg(argv, char*);
+                color = strdup(color);
+                if (!color)
+                {
+                        err = -1;
+                        break;
+                }
+                err = gmbar_add_section(bar, color);
+                if (err)
+                {
+                        break;
+                }
+        }
+        va_end(argv);
+        return err;
 }
 
 /**
