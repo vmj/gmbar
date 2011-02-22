@@ -64,7 +64,6 @@ main(int argc, char** argv)
         unsigned int total, used, buffers, cached;
         arguments config;
         gmbar* bar = NULL;
-        char* buf = NULL;
 
         bar = gmbar_new_with_defaults(100, 10, "red", "#444444");
         if (!bar)
@@ -102,33 +101,7 @@ main(int argc, char** argv)
                 gmbar_set_section_width(bar->sections[1], total, buffers);
                 gmbar_set_section_width(bar->sections[2], total, cached);
 
-                buf = gmbar_format(bar, 0);
-                if (buf)
-                {
-                        if (config.common_config.prefix && config.common_config.suffix)
-                        {
-                                printf("%s%s%s\n", config.common_config.prefix, buf, config.common_config.suffix);
-                        }
-                        else if (config.common_config.prefix)
-                        {
-                                printf("%s%s\n", config.common_config.prefix, buf);
-                        }
-                        else if (config.common_config.suffix)
-                        {
-                                printf("%s%s\n", buf, config.common_config.suffix);
-                        }
-                        else
-                        {
-                                printf("%s\n", buf);
-                        }
-                        free(buf);
-                        buf = NULL;
-                }
-                else
-                {
-                        printf("^fg(red)^bg(black)OOF^bg()^fg()\n");
-                }
-                fflush(stdout);
+                print_bar(&config.common_config);
 
                 sleep(config.common_config.interval);
         } while (config.common_config.interval);

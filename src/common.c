@@ -212,3 +212,39 @@ parse_option_arg_string(char* arg, char** str)
         }
         return err;
 }
+
+/**
+ *
+ */
+void
+print_bar(common_arguments* args)
+{
+        char* buf = gmbar_format(args->bar, 0);
+        if (buf)
+        {
+                if (args->prefix && args->suffix)
+                {
+                        printf("%s%s%s\n", args->prefix, buf, args->suffix);
+                }
+                else if (args->prefix)
+                {
+                        printf("%s%s\n", args->prefix, buf);
+                }
+                else if (args->suffix)
+                {
+                        printf("%s%s\n", buf, args->suffix);
+                }
+                else
+                {
+                        printf("%s\n", buf);
+                }
+                free(buf);
+                buf = NULL;
+        }
+        else
+        {
+                printf("^fg(red)^bg(black)OOF^bg()^fg()\n");
+        }
+        fflush(stdout);
+}
+
