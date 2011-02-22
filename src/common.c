@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "log.h"
 
 
 /* Common argp parser function */
@@ -150,7 +151,11 @@ handle_common_option(int key, char* arg, struct argp_state *state)
                 config->interval = int_value;
                 break;
         case OPTION_LOG_FILE:
-                err = parse_option_arg_string(arg, &config->log_file);
+                err = log_open(arg);
+                if (err)
+                {
+                        err = ENOMEM;
+                }
                 break;
         case OPTION_PREFIX:
                 err = parse_option_arg_string(arg, &config->prefix);

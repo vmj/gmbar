@@ -16,7 +16,6 @@ typedef struct common_arguments common_arguments;
 struct common_arguments {
         gmbar* bar;
         unsigned int interval;
-        char* log_file;
         char* prefix;
         char* suffix;
 };

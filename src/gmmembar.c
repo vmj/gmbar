@@ -4,6 +4,7 @@
 
 #include "libgmbar.h"
 #include "common.h"
+#include "log.h"
 #include "readfile.h"
 #include "version.h"
 
@@ -24,9 +25,6 @@ static int parse_meminfo_field(const char* meminfo,
                                const char* field,
                                unsigned int *value);
 static unsigned int parse_unsigned_int(const char* str);
-
-static FILE* log = NULL;
-#define LOG(f, i) if (log) fprintf(log, f, i); fflush(log);
 
 /* Argp option keys */
 enum {
@@ -83,7 +81,6 @@ main(int argc, char** argv)
 
         config.common_config.bar = bar;
         config.common_config.interval = 15;
-        config.common_config.log_file = NULL;
         config.common_config.prefix = NULL;
         config.common_config.suffix = NULL;
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
@@ -93,17 +90,6 @@ main(int argc, char** argv)
                 return err;
         }
 
-        if (config.common_config.log_file)
-        {
-                log = fopen(config.common_config.log_file, "a");
-                if (!log)
-                {
-                        err = errno;
-                        gmbar_free(bar);
-                        free(config.common_config.log_file);
-                        return err;
-                }
-        }
         do {
                 err = get_meminfo(&total, &used, &buffers, &cached);
                 if (err)
@@ -216,28 +202,28 @@ parse_meminfo(const char* meminfo,
         err = parse_meminfo_field(meminfo, "MemTotal", total);
         if (err)
         {
-                LOG("Error parsing MemTotal: %d\n", err);
+                log_error("Error parsing MemTotal: %d\n", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, "MemFree", &free);
         if (err)
         {
-                LOG("Error parsing MemFree: %d\n", err);
+                log_error("Error parsing MemFree: %d\n", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, "Buffers", buffers);
         if (err)
         {
-                LOG("Error parsing Buffers: %d\n", err);
+                log_error("Error parsing Buffers: %d\n", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, "Cached", cached);
         if (err)
         {
-                LOG("Error parsing Cached: %d\n", err);
+                log_error("Error parsing Cached: %d\n", err);
                 return err;
         }
 

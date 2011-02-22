@@ -4,6 +4,7 @@
 
 #include "libgmbar.h"
 #include "common.h"
+#include "log.h"
 #include "readfile.h"
 #include "version.h"
 
@@ -25,9 +26,6 @@ static int parse_stat(const char* stat,
                       unsigned int *idle);
 static unsigned int parse_unsigned_int(const char* str,
                                        char** end);
-
-static FILE* log = NULL;
-#define LOG(f, i) if (log) fprintf(log, f, i); fflush(log);
 
 /* Argp option keys */
 enum {
@@ -90,7 +88,6 @@ main(int argc, char** argv)
 
         config.common_config.bar = bar;
         config.common_config.interval = 15;
-        config.common_config.log_file = NULL;
         config.common_config.prefix = NULL;
         config.common_config.suffix = NULL;
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
@@ -98,20 +95,6 @@ main(int argc, char** argv)
         {
                 gmbar_free(bar);
                 return err;
-        }
-
-        if (config.common_config.log_file)
-        {
-                log = fopen(config.common_config.log_file, "a");
-                if (!log)
-                {
-                        err = errno;
-                        gmbar_free(bar);
-                        free(config.common_config.log_file);
-                        return err;
-                }
-                free(config.common_config.log_file);
-                config.common_config.log_file = NULL;
         }
 
         /* Clock ticks per second (per CPU) */
@@ -312,7 +295,7 @@ parse_stat(const char* stat,
                 p = strstr(p, field);
                 if (!p)
                 {
-                        LOG("Field not found: %d\n", -1);
+                        log_error("Field not found: %d\n", -1);
                         return -1;
                 }
         } while (p != stat && p[-1] != '\n' && p++);

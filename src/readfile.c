@@ -6,6 +6,8 @@
 #include <fcntl.h>
 
 #include "readfile.h"
+#include "log.h"
+
 
 char*
 readfile(const char* filepath)
@@ -22,7 +24,7 @@ readfile(const char* filepath)
         if (fd == -1)
         {
                 err = errno;
-//                LOG("Error opening file: %d\n", err);
+                log_error("Error opening file: %d\n", err);
         }
 
         while (!err && bytes != 0)
@@ -35,7 +37,7 @@ readfile(const char* filepath)
                         if (!tmp)
                         {
                                 err = errno;
-//                                LOG("Error allocating space for file contents: %d", err);
+                                log_error("Error allocating space for file contents: %d", err);
                                 break;
                         }
                         buf = tmp;
@@ -45,7 +47,7 @@ readfile(const char* filepath)
                 {
                 case -1:
                         err = errno;
-//                        LOG("Error reading file: %d\n", err);
+                        log_error("Error reading file: %d\n", err);
                         break;
                 case 0:
                         buf[bufsize + 1] = '\0';
@@ -62,7 +64,7 @@ readfile(const char* filepath)
                 if (fd == -1)
                 {
                         err = errno;
-//                        LOG("Error closing file: %d\n", err);
+                        log_error("Error closing file: %d\n", err);
                 }
         }
 
