@@ -10,6 +10,7 @@
 #include <argp.h>
 
 #include "libgmbar.h"
+#include "common.h"
 #include "version.h"
 
 /* Static functions */
@@ -37,29 +38,6 @@ static FILE* log = NULL;
 
 /* Argp option keys */
 enum {
-        /* */
-        OPTION_MARGIN_TOP = 0,
-        OPTION_MARGIN_RIGHT = 1,
-        OPTION_MARGIN_BOTTOM = 2,
-        OPTION_MARGIN_LEFT = 3,
-        OPTION_PADDING_TOP = 4,
-        OPTION_PADDING_RIGHT = 5,
-        OPTION_PADDING_BOTTOM = 6,
-        OPTION_PADDING_LEFT = 7,
-
-        /* */
-        OPTION_WIDTH = 'w',
-        OPTION_HEIGHT = 'h',
-        OPTION_FOREGROUND_COLOR = 'F',
-        OPTION_BACKGROUND_COLOR = 'B',
-        OPTION_MARGIN = 'm',
-        OPTION_PADDING = 'p',
-        OPTION_UPDATE_INTERVAL = 'i',
-        OPTION_LOG_FILE = 'L',
-        OPTION_PREFIX = 'P',
-        OPTION_SUFFIX = 'S',
-
-        /* Command specific options */
         OPTION_KERN_COLOR = 'a',
         OPTION_USER_COLOR = 'b',
         OPTION_NICE_COLOR = 'c',
@@ -70,37 +48,11 @@ enum {
 /* Argp input */
 typedef struct arguments arguments;
 struct arguments {
-        gmbar* bar;
-        unsigned int interval;
-        char* log_file;
-        char* prefix;
-        char* suffix;
+        common_arguments common_config;
 };
 
 /* Options */
 static struct argp_option options[] = {
-        { "width",      OPTION_WIDTH,              "WIDTH",     0,
-          "Width of the bar in pixels, including margins"       },
-        { "height",     OPTION_HEIGHT,             "HEIGHT",    0,
-          "Height of the bar in pixels, including margins"      },
-        { "fg",         OPTION_FOREGROUND_COLOR,   "COLOR",     0,
-          "Foreground color of the bar (the outline color)"     },
-        { "bg",         OPTION_BACKGROUND_COLOR,   "COLOR",     0,
-          "Background color of the bar (not used at the moment)"},
-        { "margin",     OPTION_MARGIN,             "MARGIN",    0,
-          "Margin size in pixels, all four sides"               },
-        { "padding",    OPTION_PADDING,            "PADDING",   0,
-          "Padding size in pizels, all four sides"              },
-        { "interval",   OPTION_UPDATE_INTERVAL,    "SECONDS",   0,
-          "Polling intetrval in seconds (zero disables polling)"},
-        { "logfile",    OPTION_LOG_FILE,           "LOGFILE",   0,
-          "Log debug messages to file"                          },
-        { "prefix",     OPTION_PREFIX,             "PREFIX",    0,
-          "Prefix to print before the bar"                      },
-        { "suffix",     OPTION_SUFFIX,             "SUFFIX",    0,
-          "Suffix to print after the bar"                       },
-
-        /* Command specific options */
         { "kern",       OPTION_KERN_COLOR,         "COLOR",     0,
           "Color for the kernel portion of the bar"             },
         { "user",       OPTION_USER_COLOR,         "COLOR",     0,
@@ -109,13 +61,13 @@ static struct argp_option options[] = {
           "Color for the nice portion of the bar"               },
         { "idle",       OPTION_IDLE_COLOR,         "COLOR",     0,
           "Color for the idle portion of the bar"               },
-
         { 0 }
 };
 
 /* Argp parser */
 static const struct argp argp = { options, handle_option, NULL,
-        "gmcpubar -- dzen2 cpu bar"
+                                  "gmcpubar -- dzen2 cpu bar",
+                                  common_argp_child
 };
 
 int
@@ -143,11 +95,11 @@ main(int argc, char** argv)
                 return -1;
         }
 
-        config.bar = bar;
-        config.interval = 15;
-        config.log_file = NULL;
-        config.prefix = NULL;
-        config.suffix = NULL;
+        config.common_config.bar = bar;
+        config.common_config.interval = 15;
+        config.common_config.log_file = NULL;
+        config.common_config.prefix = NULL;
+        config.common_config.suffix = NULL;
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
         if (err)
         {
@@ -155,18 +107,18 @@ main(int argc, char** argv)
                 return err;
         }
 
-        if (config.log_file)
+        if (config.common_config.log_file)
         {
-                log = fopen(config.log_file, "a");
+                log = fopen(config.common_config.log_file, "a");
                 if (!log)
                 {
                         err = errno;
                         gmbar_free(bar);
-                        free(config.log_file);
+                        free(config.common_config.log_file);
                         return err;
                 }
-                free(config.log_file);
-                config.log_file = NULL;
+                free(config.common_config.log_file);
+                config.common_config.log_file = NULL;
         }
 
         /* Clock ticks per second (per CPU) */
@@ -188,9 +140,9 @@ main(int argc, char** argv)
                 return err;
         }
 
-        while (config.interval)
+        while (config.common_config.interval)
         {
-                sleep(config.interval);
+                sleep(config.common_config.interval);
 
                 err = get_stat(&kern, &user, &nice, &idle);
                 if (err)
@@ -210,17 +162,17 @@ main(int argc, char** argv)
                 buf = gmbar_format(bar, 0);
                 if (buf)
                 {
-                        if (config.prefix && config.suffix)
+                        if (config.common_config.prefix && config.common_config.suffix)
                         {
-                                printf("%s%s%s\n", config.prefix, buf, config.suffix);
+                                printf("%s%s%s\n", config.common_config.prefix, buf, config.common_config.suffix);
                         }
-                        else if (config.prefix)
+                        else if (config.common_config.prefix)
                         {
-                                printf("%s%s\n", config.prefix, buf);
+                                printf("%s%s\n", config.common_config.prefix, buf);
                         }
-                        else if (config.suffix)
+                        else if (config.common_config.suffix)
                         {
-                                printf("%s%s\n", buf, config.suffix);
+                                printf("%s%s\n", buf, config.common_config.suffix);
                         }
                         else
                         {
@@ -248,185 +200,27 @@ static error_t
 handle_option(int key, char* arg, struct argp_state *state)
 {
         error_t err = 0;
-        unsigned int int_value = 0;
         arguments* config = (arguments*) state->input;
 
         switch (key)
         {
-        case OPTION_MARGIN_TOP:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->margin.top = int_value;
-                break;
-        case OPTION_MARGIN_RIGHT:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->margin.right = int_value;
-                break;
-        case OPTION_MARGIN_BOTTOM:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->margin.bottom = int_value;
-                break;
-        case OPTION_MARGIN_LEFT:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->margin.left = int_value;
-                break;
-        case OPTION_PADDING_TOP:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->padding.top = int_value;
-                break;
-        case OPTION_PADDING_RIGHT:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->padding.right = int_value;
-                break;
-        case OPTION_PADDING_BOTTOM:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->padding.bottom = int_value;
-                break;
-        case OPTION_PADDING_LEFT:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->padding.left = int_value;
-                break;
-        case OPTION_WIDTH:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->size.width = int_value;
-                break;
-        case OPTION_HEIGHT:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->size.height = int_value;
-                break;
-        case OPTION_FOREGROUND_COLOR:
-                if (config->bar->color.fg)
-                {
-                        free(config->bar->color.fg);
-                        config->bar->color.fg = NULL;
-                }
-                config->bar->color.fg = strdup(arg);
-                if (!config->bar->color.fg)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_BACKGROUND_COLOR:
-                if (config->bar->color.bg)
-                {
-                        free(config->bar->color.bg);
-                        config->bar->color.bg = NULL;
-                }
-                config->bar->color.bg = strdup(arg);
-                if (!config->bar->color.bg)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_MARGIN:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->margin.top = int_value;
-                config->bar->margin.right = int_value;
-                config->bar->margin.bottom = int_value;
-                config->bar->margin.left = int_value;
-                break;
-        case OPTION_PADDING:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->bar->padding.top = int_value;
-                config->bar->padding.right = int_value;
-                config->bar->padding.bottom = int_value;
-                config->bar->padding.left = int_value;
-                break;
-        case OPTION_UPDATE_INTERVAL:
-                int_value = parse_unsigned_int(arg, NULL);
-                config->interval = int_value;
-                break;
-        case OPTION_LOG_FILE:
-                if (config->log_file)
-                {
-                        free(config->log_file);
-                        config->log_file = NULL;
-                }
-                config->log_file = strdup(arg);
-                if (!config->log_file)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_PREFIX:
-                if (config->prefix)
-                {
-                        free(config->prefix);
-                        config->prefix = NULL;
-                }
-                config->prefix = strdup(arg);
-                if (!config->prefix)
-                {
-                        err = ENOMEM;
-                }
-                break;
-        case OPTION_SUFFIX:
-                if (config->suffix)
-                {
-                        free(config->suffix);
-                        config->suffix = NULL;
-                }
-                config->suffix = strdup(arg);
-                if (!config->suffix)
-                {
-                        err = ENOMEM;
-                }
+        case ARGP_KEY_INIT:
+                state->child_inputs[0] = config;
                 break;
 
-        /* Command specific options */
         case OPTION_KERN_COLOR:
-                if (config->bar->sections[0]->color)
-                {
-                        free(config->bar->sections[0]->color);
-                        config->bar->sections[0]->color = NULL;
-                }
-                config->bar->sections[0]->color = strdup(arg);
-                if (!config->bar->sections[0]->color)
-                {
-                        err = ENOMEM;
-                }
+                err = parse_option_arg_string(arg, &config->common_config.bar->sections[0]->color);
                 break;
         case OPTION_USER_COLOR:
-                if (config->bar->sections[1]->color)
-                {
-                        free(config->bar->sections[1]->color);
-                        config->bar->sections[1]->color = NULL;
-                }
-                config->bar->sections[1]->color = strdup(arg);
-                if (!config->bar->sections[1]->color)
-                {
-                        err = ENOMEM;
-                }
+                err = parse_option_arg_string(arg, &config->common_config.bar->sections[1]->color);
                 break;
         case OPTION_NICE_COLOR:
-                if (config->bar->sections[2]->color)
-                {
-                        free(config->bar->sections[2]->color);
-                        config->bar->sections[2]->color = NULL;
-                }
-                config->bar->sections[2]->color = strdup(arg);
-                if (!config->bar->sections[2]->color)
-                {
-                        err = ENOMEM;
-                }
+                err = parse_option_arg_string(arg, &config->common_config.bar->sections[2]->color);
                 break;
         case OPTION_IDLE_COLOR:
-                if (config->bar->sections[3]->color)
-                {
-                        free(config->bar->sections[3]->color);
-                        config->bar->sections[3]->color = NULL;
-                }
-                config->bar->sections[3]->color = strdup(arg);
-                if (!config->bar->sections[3]->color)
-                {
-                        err = ENOMEM;
-                }
+                err = parse_option_arg_string(arg, &config->common_config.bar->sections[3]->color);
                 break;
-/*
-        case ARGP_KEY_SUCCESS:
-        case ARGP_KEY_ERROR:
-        case ARGP_KEY_END:
-                break;
-*/
+
         default:
                 err = ARGP_ERR_UNKNOWN;
                 break;
