@@ -11,8 +11,35 @@ static FILE* log = NULL;
  */
 int log_open(char* filename)
 {
-        log = fopen(filename, "a");
-        return errno;
+        int err = 0;
+        if (log)
+        {
+                err = log_close();
+        }
+        if (!err)
+        {
+                log = fopen(filename, "a");
+                if (!log)
+                {
+                        err = errno;
+                }
+        }
+        return err;
+}
+
+/**
+ *
+ */
+int log_close()
+{
+        int err = 0;
+        if (log)
+        {
+                err = fclose(log);
+                /* error or not, log should not be accessed */
+                log = NULL;
+        }
+        return err == EOF ? errno : 0;
 }
 
 /**
