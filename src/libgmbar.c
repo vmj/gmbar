@@ -181,12 +181,15 @@ gmbar_set_section_width(gmsection* section, unsigned int total, unsigned int val
  *
  * @param   bar   Bar to textualize
  * @param   nl    If non-zero, newline is added to the end of the string
- * @return A newly allocated buffer or NULL if allocation failed.  Caller
- * is responsible for freeing the returned buffer.
+ * @param   data  On return, a newly allocated buffer or NULL if
+ *                allocation failed.  Caller is responsible for freeing
+ *                the returned buffer.
+ * @return  Zero on success, non-zero on failure.
  */
-char*
-gmbar_format(gmbar* bar, unsigned int nl)
+int
+gmbar_format(gmbar* bar, unsigned int nl, char** buf)
 {
+        int err = 0;
         /* width of the bar without margins */
         int bar_width = bar->size.width - bar->margin.left - bar->margin.right;
         /* height of the sections */
@@ -204,11 +207,11 @@ gmbar_format(gmbar* bar, unsigned int nl)
         unsigned int i = 0;
         gmsection* section = NULL;
 
-        char* buf = (char*) malloc(size);
-        if (buf)
+        *buf = (char*) malloc(size);
+        if (*buf)
         {
                 /* draw the outline and put position to start of the first section */
-                written = snprintf(buf, size, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
+                written = snprintf(*buf, size, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
                                    bar->margin.left,
                                    bar->color.fg,
                                    bar_width,
@@ -228,11 +231,11 @@ gmbar_format(gmbar* bar, unsigned int nl)
                         }
                         else if (strcmp(section->color, "none") == 0)
                         {
-                                written = snprintf(&buf[nchars], size, "^p(%u)", section->width);
+                                written = snprintf(*buf + nchars, size, "^p(%u)", section->width);
                         }
                         else
                         {
-                                written = snprintf(&buf[nchars], size, "^fg(%s)^r(%ux%u)",
+                                written = snprintf(*buf + nchars, size, "^fg(%s)^r(%ux%u)",
                                                    section->color,
                                                    section->width,
                                                    section_height);
@@ -242,17 +245,21 @@ gmbar_format(gmbar* bar, unsigned int nl)
                 if (size > 0)
                 {
                         /* move position to right margin */
-                        written = snprintf(&buf[nchars], size, "^p(%d)", width);
+                        written = snprintf(*buf + nchars, size, "^p(%d)", width);
                         nchars += written;
                         size -= written;
                 }
 
                 if (size <= 0)
                 {
-                        free(buf);
-                        buf = NULL;
+                        free(*buf);
+                        *buf = NULL;
                 }
         }
+        else
+        {
+                err = -1;
+        }
 
-        return buf;
+        return err;
 }

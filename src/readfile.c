@@ -9,8 +9,8 @@
 #include "log.h"
 
 
-char*
-readfile(const char* filepath)
+int
+readfile(const char* filepath, char** data)
 {
         int err = 0;
         int fd = 0;
@@ -75,9 +75,9 @@ readfile(const char* filepath)
                         free(buf);
                         buf = NULL;
                 }
-                errno = err;
         }
 
-        return buf;
+        *data = buf;
+        return err;
 }
 

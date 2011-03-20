@@ -1,6 +1,6 @@
 #ifndef READFILE_H
 #define READFILE_H
 
-char* readfile(const char* filepath);
+int readfile(const char* filepath, char** buf);
 
 #endif //READFILE_H

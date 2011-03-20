@@ -4,7 +4,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-unsigned int parse_option_arg_unsigned_int(char* arg);
+int parse_option_arg_unsigned_int(char* arg, unsigned int* val);
+int parse_option_arg_unsigned_char(char* arg, unsigned char* val);
 int parse_option_arg_string(char* arg, char** str);
 
 /* Common argp children */
@@ -19,6 +20,6 @@ struct common_arguments {
         char* suffix;
 };
 
-void print_bar(common_arguments* args);
+int print_bar(common_arguments* args);
 
 #endif //COMMON_H

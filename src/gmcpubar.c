@@ -134,7 +134,12 @@ main(int argc, char** argv)
                 gmbar_set_section_width(bar->sections[2], total, nice - _nice);
                 gmbar_set_section_width(bar->sections[3], total, idle - _idle);
 
-                print_bar(&config.common_config);
+                err = print_bar(&config.common_config);
+                if (err)
+                {
+                        gmbar_free(bar);
+                        return err;
+                }
 
                 _kern = kern;
                 _user = user;
@@ -189,10 +194,10 @@ get_stat(unsigned int *kern,
 
         *kern = *user = *nice = *idle = 0;
 
-        stat = readfile("/proc/stat");
-        if (!stat)
+        err = readfile("/proc/stat", &stat);
+        if (err || !stat)
         {
-                return errno;
+                return err;
         }
 
         err = parse_stat(stat, "cpu ", kern, user, nice, idle);
@@ -204,12 +209,13 @@ get_stat(unsigned int *kern,
 static long
 get_num_cpus()
 {
+        int err = 0;
         char* cpuinfo = NULL;
 
-        cpuinfo = readfile("/proc/cpuinfo");
-        if (!cpuinfo)
+        err = readfile("/proc/cpuinfo", &cpuinfo);
+        if (err || !cpuinfo)
         {
-                return errno;
+                return err;
         }
 
         return parse_cpuinfo(cpuinfo);

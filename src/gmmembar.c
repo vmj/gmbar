@@ -101,7 +101,12 @@ main(int argc, char** argv)
                 gmbar_set_section_width(bar->sections[1], total, buffers);
                 gmbar_set_section_width(bar->sections[2], total, cached);
 
-                print_bar(&config.common_config);
+                err = print_bar(&config.common_config);
+                if (err)
+                {
+                        gmbar_free(bar);
+                        return err;
+                }
 
                 sleep(config.common_config.interval);
         } while (config.common_config.interval);
@@ -150,10 +155,10 @@ get_meminfo(unsigned int *total,
 
         *total = *used = *buffers = *cached = 0;
 
-        meminfo = readfile("/proc/meminfo");
-        if (!meminfo)
+        err = readfile("/proc/meminfo", &meminfo);
+        if (err || !meminfo)
         {
-                return errno;
+                return err;
         }
 
         err = parse_meminfo(meminfo, total, used, buffers, cached);
