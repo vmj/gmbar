@@ -20,6 +20,10 @@ struct common_arguments {
         char* suffix;
 };
 
+const char*   memstr   (const char* data,
+                        const char* str,
+                        unsigned int size);
+
 int print_bar(common_arguments* args);
 
 #endif //COMMON_H

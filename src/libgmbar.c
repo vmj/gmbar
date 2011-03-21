@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 /**
  * Creates a new gmbar.
@@ -187,9 +188,10 @@ gmbar_set_section_width(gmsection* section, unsigned int total, unsigned int val
  * @return  Zero on success, non-zero on failure.
  */
 int
-gmbar_format(gmbar* bar, unsigned int nl, char** buf)
+gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
 {
         int err = 0;
+        char* tmp = NULL;
         /* width of the bar without margins */
         int bar_width = bar->size.width - bar->margin.left - bar->margin.right;
         /* height of the sections */
@@ -200,30 +202,36 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf)
          * right margin */
         int width = bar_width - bar->padding.left + bar->margin.right;
 
-        int size = 1024;
-        int nchars = 0;
-        int written = 0;
-
         unsigned int i = 0;
         gmsection* section = NULL;
 
-        *buf = (char*) malloc(size);
-        if (*buf)
+        do
         {
+                if (*len == *max)
+                {
+                        tmp = realloc(*buf, *max + 1024);
+                        if (!tmp)
+                        {
+                                err = errno;
+                                log_error("Error allocating space for output: %d\n", err);
+                                break;
+                        }
+                        *max += 1024;
+                        *buf = tmp;
+                }
+
                 /* draw the outline and put position to start of the first section */
-                written = snprintf(*buf, size, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
-                                   bar->margin.left,
-                                   bar->color.fg,
-                                   bar_width,
-                                   bar->size.height - bar->margin.top - bar->margin.bottom,
-                                   -bar_width + bar->padding.left);
-                nchars += written;
-                size -= written;
+                *len += snprintf(*buf, *max, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
+                                bar->margin.left,
+                                bar->color.fg,
+                                bar_width,
+                                bar->size.height - bar->margin.top - bar->margin.bottom,
+                                -bar_width + bar->padding.left);
 
                 /* draw the sections */
-                for (i = 0, section = NULL, written = 0;
-                     i < bar->nsections && (section = bar->sections[i]) && size > 0;
-                     i++, width -= section->width, nchars += written, size -= written, written = 0)
+                for (i = 0, section = NULL;
+                     i < bar->nsections && (section = bar->sections[i]) && *max - *len > 0;
+                     i++, width -= section->width)
                 {
                         if (section->width == 0)
                         {
@@ -231,35 +239,30 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf)
                         }
                         else if (strcmp(section->color, "none") == 0)
                         {
-                                written = snprintf(*buf + nchars, size, "^p(%u)", section->width);
+                                *len += snprintf(*buf + *len, *max - *len, "^p(%u)", section->width);
                         }
                         else
                         {
-                                written = snprintf(*buf + nchars, size, "^fg(%s)^r(%ux%u)",
-                                                   section->color,
-                                                   section->width,
-                                                   section_height);
+                                *len += snprintf(*buf + *len, *max - *len, "^fg(%s)^r(%ux%u)",
+                                                section->color,
+                                                section->width,
+                                                section_height);
                         }
                 }
 
-                if (size > 0)
+                if (*max - *len > 0)
                 {
                         /* move position to right margin */
-                        written = snprintf(*buf + nchars, size, "^p(%d)", width);
-                        nchars += written;
-                        size -= written;
+                        *len += snprintf(*buf + *len, *max - *len, "^p(%d)", width);
                 }
 
-                if (size <= 0)
+                if (*max - *len > 0)
                 {
-                        free(*buf);
-                        *buf = NULL;
+                        /* everything fits */
+                        break;
                 }
         }
-        else
-        {
-                err = -1;
-        }
+        while(1);
 
         return err;
 }

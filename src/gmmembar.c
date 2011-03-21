@@ -6,22 +6,26 @@
 #include "common.h"
 #include "log.h"
 #include "readfile.h"
+#include "buffer.h"
 #include "version.h"
 
 /* Static functions */
 static error_t handle_option(int key,
                              char* arg,
                              struct argp_state *state);
-static int get_meminfo(unsigned int *total,
+static int get_meminfo(buffer* meminfo,
+                       unsigned int *total,
                        unsigned int *used,
                        unsigned int *buffers,
                        unsigned int *cached);
 static int parse_meminfo(const char* meminfo,
+                         const unsigned int size,
                          unsigned int *total,
                          unsigned int *used,
                          unsigned int *buffers,
                          unsigned int *cached);
 static int parse_meminfo_field(const char* meminfo,
+                               const unsigned int size,
                                const char* field,
                                unsigned int *value);
 static unsigned int parse_unsigned_int(const char* str);
@@ -63,17 +67,26 @@ main(int argc, char** argv)
         int err = 0;
         unsigned int total, used, buffers, cached;
         arguments config;
+        buffer* meminfo = NULL;
         gmbar* bar = NULL;
+
+        meminfo = buffer_new();
+        if (!meminfo)
+        {
+                return -1;
+        }
 
         bar = gmbar_new_with_defaults(100, 10, "red", "#444444");
         if (!bar)
         {
+                buffer_free(meminfo);
                 return -1;
         }
 
         err = gmbar_add_sections(bar, 3, "red", "orange", "yellow");
         if (err)
         {
+                buffer_free(meminfo);
                 gmbar_free(bar);
                 return -1;
         }
@@ -85,14 +98,16 @@ main(int argc, char** argv)
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
         if (err)
         {
+                buffer_free(meminfo);
                 gmbar_free(bar);
                 return err;
         }
 
         do {
-                err = get_meminfo(&total, &used, &buffers, &cached);
+                err = get_meminfo(meminfo, &total, &used, &buffers, &cached);
                 if (err)
                 {
+                        buffer_free(meminfo);
                         gmbar_free(bar);
                         return err;
                 }
@@ -104,6 +119,7 @@ main(int argc, char** argv)
                 err = print_bar(&config.common_config);
                 if (err)
                 {
+                        buffer_free(meminfo);
                         gmbar_free(bar);
                         return err;
                 }
@@ -145,30 +161,33 @@ handle_option(int key, char* arg, struct argp_state *state)
 }
 
 static int
-get_meminfo(unsigned int *total,
+get_meminfo(buffer* meminfo,
+            unsigned int *total,
             unsigned int *used,
             unsigned int *buffers,
             unsigned int *cached)
 {
         int err = 0;
-        char* meminfo = NULL;
 
         *total = *used = *buffers = *cached = 0;
 
-        err = readfile("/proc/meminfo", &meminfo);
-        if (err || !meminfo)
+        /* reuse all the space */
+        meminfo->len = 0;
+
+        err = readfile("/proc/meminfo", &meminfo->buf, &meminfo->len, &meminfo->max);
+        if (err)
         {
                 return err;
         }
 
-        err = parse_meminfo(meminfo, total, used, buffers, cached);
-        free(meminfo);
+        err = parse_meminfo(meminfo->buf, meminfo->len, total, used, buffers, cached);
         return err;
 }
 
 
 static int
 parse_meminfo(const char* meminfo,
+              const unsigned int size,
               unsigned int *total,
               unsigned int *used,
               unsigned int *buffers,
@@ -177,28 +196,28 @@ parse_meminfo(const char* meminfo,
         int err = 0;
         unsigned int free;
 
-        err = parse_meminfo_field(meminfo, "MemTotal", total);
+        err = parse_meminfo_field(meminfo, size, "MemTotal", total);
         if (err)
         {
                 log_error("Error parsing MemTotal: %d\n", err);
                 return err;
         }
 
-        err = parse_meminfo_field(meminfo, "MemFree", &free);
+        err = parse_meminfo_field(meminfo, size, "MemFree", &free);
         if (err)
         {
                 log_error("Error parsing MemFree: %d\n", err);
                 return err;
         }
 
-        err = parse_meminfo_field(meminfo, "Buffers", buffers);
+        err = parse_meminfo_field(meminfo, size, "Buffers", buffers);
         if (err)
         {
                 log_error("Error parsing Buffers: %d\n", err);
                 return err;
         }
 
-        err = parse_meminfo_field(meminfo, "Cached", cached);
+        err = parse_meminfo_field(meminfo, size, "Cached", cached);
         if (err)
         {
                 log_error("Error parsing Cached: %d\n", err);
@@ -214,6 +233,7 @@ parse_meminfo(const char* meminfo,
  * Parse one field of meminfo.
  *
  * @param   meminfo   Contents of the /proc/meminfo file
+ * @param   size      Content length in bytes
  * @param   field     Name of the field to parse, e.g. "MemTotal", zero terminated
  * @param   value     On return, contains the parsed value or zero.
  * @return  Zero on success, -1 if the field is not found.  Note that any
@@ -221,10 +241,12 @@ parse_meminfo(const char* meminfo,
  */
 static int
 parse_meminfo_field(const char* meminfo,
+                    const unsigned int size,
                     const char* field,
                     unsigned int *value)
 {
         const char* p = meminfo;
+        unsigned int len = size;
 
         /* Initialize to zero */
         *value = 0;
@@ -232,12 +254,12 @@ parse_meminfo_field(const char* meminfo,
         /* Find the field */
         do
         {
-                p = strstr(p, field);
+                p = memstr(p, field, len);
                 if (!p)
                 {
                         return -1;
                 }
-        } while (p != meminfo && p[-1] != '\n' && p++);
+        } while (p != meminfo && p[-1] != '\n' && p++ && len--);
 
         /* Skip the label */
         p += strlen(field);
@@ -249,7 +271,7 @@ parse_meminfo_field(const char* meminfo,
         /* Parse the digits (base ten value) */
         *value = parse_unsigned_int(p);
 
-        /* meminfo is in kilobytes */
+        /* meminfo is in kilobytes (KiB) */
         *value = *value * 1024;
 
         return 0;

@@ -6,26 +6,31 @@
 #include "common.h"
 #include "log.h"
 #include "readfile.h"
+#include "buffer.h"
 #include "version.h"
 
 /* Static functions */
 static error_t handle_option(int key,
                              char* arg,
                              struct argp_state *state);
-static int get_stat(unsigned int *kern,
+static int get_stat(buffer* stat,
+                    unsigned int *kern,
                     unsigned int *user,
                     unsigned int *nice,
                     unsigned int *idle);
 static long get_num_cpus();
-static long parse_cpuinfo(const char* cpuinfo);
+static long parse_cpuinfo(const char* cpuinfo,
+                          const unsigned int size);
 static int parse_stat(const char* stat,
+                      const unsigned int size,
                       const char* field,
                       unsigned int *kern,
                       unsigned int *user,
                       unsigned int *nice,
                       unsigned int *idle);
 static unsigned int parse_unsigned_int(const char* str,
-                                       char** end);
+                                       const char** end);
+
 
 /* Argp option keys */
 enum {
@@ -70,17 +75,26 @@ main(int argc, char** argv)
         unsigned int _kern, _user, _nice, _idle;
         unsigned int kern, user, nice, idle;
         arguments config;
+        buffer* stat = NULL;
         gmbar* bar = NULL;
+
+        stat = buffer_new();
+        if (!stat)
+        {
+                return -1;
+        }
 
         bar = gmbar_new_with_defaults(100, 10, "red", "#444444");
         if (!bar)
         {
+                buffer_free(stat);
                 return -1;
         }
 
         err = gmbar_add_sections(bar, 4, "red", "orange", "yellow", "green");
         if (err)
         {
+                buffer_free(stat);
                 gmbar_free(bar);
                 return -1;
         }
@@ -92,6 +106,7 @@ main(int argc, char** argv)
         err = argp_parse(&argp, argc, argv, 0, NULL, &config);
         if (err)
         {
+                buffer_free(stat);
                 gmbar_free(bar);
                 return err;
         }
@@ -103,14 +118,16 @@ main(int argc, char** argv)
         num_cpus = get_num_cpus();
         if (num_cpus < 0)
         {
+                buffer_free(stat);
                 gmbar_free(bar);
                 return num_cpus;
         }
 
         /* Initialize history */
-        err = get_stat(&_kern, &_user, &_nice, &_idle);
+        err = get_stat(stat, &_kern, &_user, &_nice, &_idle);
         if (err)
         {
+                buffer_free(stat);
                 gmbar_free(bar);
                 return err;
         }
@@ -119,9 +136,10 @@ main(int argc, char** argv)
         {
                 sleep(config.common_config.interval);
 
-                err = get_stat(&kern, &user, &nice, &idle);
+                err = get_stat(stat, &kern, &user, &nice, &idle);
                 if (err)
                 {
+                        buffer_free(stat);
                         gmbar_free(bar);
                         return err;
                 }
@@ -137,6 +155,7 @@ main(int argc, char** argv)
                 err = print_bar(&config.common_config);
                 if (err)
                 {
+                        buffer_free(stat);
                         gmbar_free(bar);
                         return err;
                 }
@@ -184,24 +203,26 @@ handle_option(int key, char* arg, struct argp_state *state)
 }
 
 static int
-get_stat(unsigned int *kern,
+get_stat(buffer* stat,
+         unsigned int *kern,
          unsigned int *user,
          unsigned int *nice,
          unsigned int *idle)
 {
         int err = 0;
-        char* stat = NULL;
 
         *kern = *user = *nice = *idle = 0;
 
-        err = readfile("/proc/stat", &stat);
-        if (err || !stat)
+        /* reuse all the space */
+        stat->len = 0;
+
+        err = readfile("/proc/stat", &stat->buf, &stat->len, &stat->max);
+        if (err)
         {
                 return err;
         }
 
-        err = parse_stat(stat, "cpu ", kern, user, nice, idle);
-        free(stat);
+        err = parse_stat(stat->buf, stat->len, "cpu ", kern, user, nice, idle);
         return err;
 }
 
@@ -211,31 +232,35 @@ get_num_cpus()
 {
         int err = 0;
         char* cpuinfo = NULL;
+        unsigned int size = 0;
+        unsigned int max = 0;
 
-        err = readfile("/proc/cpuinfo", &cpuinfo);
+        err = readfile("/proc/cpuinfo", &cpuinfo, &size, &max);
         if (err || !cpuinfo)
         {
                 return err;
         }
 
-        return parse_cpuinfo(cpuinfo);
+        return parse_cpuinfo(cpuinfo, size);
 }
 
 /**
  *
  */
 static long
-parse_cpuinfo(const char* cpuinfo)
+parse_cpuinfo(const char* cpuinfo, const unsigned int size)
 {
-        char* p = (char*)cpuinfo;
+        const char* p = cpuinfo;
+        unsigned int len = size;
         long cpus = 0;
 
         do
         {
-                p = strstr(p, "processor");
+                p = memstr(p, "processor", len);
                 if (p && (p == cpuinfo || p[-1] == '\n'))
                 {
                         cpus++;
+                        len = size - (p - cpuinfo);
                         p++;
                 }
         } while (p);
@@ -247,6 +272,7 @@ parse_cpuinfo(const char* cpuinfo)
  * Parse CPU field from stat.
  *
  * @param   stat      Contents of the /proc/stat file
+ * @param   size      Size of the content
  * @param   field     Name of the field to parse, e.g. "cpu" or "cpu1", zero terminated
  * @param   kern      On return, contains the parsed value or zero.
  * @param   user      On return, contains the parsed value or zero.
@@ -257,13 +283,15 @@ parse_cpuinfo(const char* cpuinfo)
  */
 static int
 parse_stat(const char* stat,
+           const unsigned int size,
            const char* field,
            unsigned int *kern,
            unsigned int *user,
            unsigned int *nice,
            unsigned int *idle)
 {
-        char* p = (char*)stat;
+        const char* p = stat;
+        unsigned int len = size;
 
         /* Initialize to zeros */
         *kern = *user = *nice = *idle = 0;
@@ -271,13 +299,13 @@ parse_stat(const char* stat,
         /* Find the field */
         do
         {
-                p = strstr(p, field);
+                p = memstr(p, field, len);
                 if (!p)
                 {
                         log_error("Field not found: %d\n", -1);
                         return -1;
                 }
-        } while (p != stat && p[-1] != '\n' && p++);
+        } while (p != stat && p[-1] != '\n' && p++ && (len = size - (p - stat)));
 
         /* Skip the label */
         p += strlen(field);
@@ -295,7 +323,7 @@ parse_stat(const char* stat,
  * @return  Parsed value.
  */
 static unsigned int
-parse_unsigned_int(const char* str, char** end)
+parse_unsigned_int(const char* str, const char** end)
 {
         unsigned int value = 0;
         while (!isdigit(*str))

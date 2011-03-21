@@ -10,15 +10,12 @@
 
 
 int
-readfile(const char* filepath, char** data)
+readfile(const char* filepath, char** data, unsigned int* size, unsigned int* max)
 {
         int err = 0;
         int fd = 0;
         ssize_t bytes = -1;
-        char* buf = NULL;
         char* tmp = NULL;
-        unsigned int bufsize = 0;
-        unsigned int bufmax = 0;
 
         fd = open(filepath, O_RDONLY);
         if (fd == -1)
@@ -30,30 +27,28 @@ readfile(const char* filepath, char** data)
         while (!err && bytes != 0)
         {
 
-                if (bufsize == bufmax)
+                if (*size == *max)
                 {
-                        bufmax += 1024;
-                        tmp = realloc(buf, bufmax + 1);
+                        *max += 1024;
+                        tmp = realloc(*data, *max);
                         if (!tmp)
                         {
+                                *max -= 1024;
                                 err = errno;
-                                log_error("Error allocating space for file contents: %d", err);
+                                log_error("Error allocating space for file contents: %d\n", err);
                                 break;
                         }
-                        buf = tmp;
+                        *data = tmp;
                 }
-                bytes = read(fd, buf + bufsize, bufmax - bufsize);
+                bytes = read(fd, *data + *size, *max - *size);
                 switch (bytes)
                 {
                 case -1:
                         err = errno;
                         log_error("Error reading file: %d\n", err);
                         break;
-                case 0:
-                        buf[bufsize + 1] = '\0';
-                        break;
                 default:
-                        bufsize += bytes;
+                        *size += bytes;
                         break;
                 }
         }
@@ -63,21 +58,11 @@ readfile(const char* filepath, char** data)
                 fd = close(fd);
                 if (fd == -1)
                 {
-                        err = errno;
-                        log_error("Error closing file: %d\n", err);
+                        if (!err) err = errno;
+                        log_error("Error closing file: %d\n", errno);
                 }
         }
 
-        if (err)
-        {
-                if (buf)
-                {
-                        free(buf);
-                        buf = NULL;
-                }
-        }
-
-        *data = buf;
         return err;
 }
 

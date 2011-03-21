@@ -223,16 +223,48 @@ parse_option_arg_string(char* arg, char** str)
 }
 
 /**
+ * Find @str in @mem.
+ *
+ * If @str is zero length or NULL, @mem is returned.
+ *
+ * @param   mem    Memory buffer from which to search
+ * @param   str    Zero terminated string to search
+ * @param   size   Size of the mem buffer in bytes
+ * @return  
+ */
+const char*
+memstr(const char* mem, const char* str, unsigned int size)
+{
+        const size_t len = str ? strlen(str) : 0;
+
+        if (len == 0)
+                return mem;
+
+        while (size >= len)
+        {
+                if (memcmp(mem, str, len) == 0)
+                        return mem;
+                mem++;
+                size--;
+        }
+
+        return NULL;
+}
+
+/**
  *
  */
 int
 print_bar(common_arguments* args)
 {
+        static char* buf = NULL;
+        static int len = 0;
+        static int max = 0;
         int err = 0;
-        char* buf = NULL;
 
-        err = gmbar_format(args->bar, 0, &buf);
-        if (!err && buf)
+        len = 0;
+        err = gmbar_format(args->bar, 0, &buf, &len, &max);
+        if (!err)
         {
                 if (args->prefix && args->suffix)
                 {
@@ -250,8 +282,6 @@ print_bar(common_arguments* args)
                 {
                         printf("%s\n", buf);
                 }
-                free(buf);
-                buf = NULL;
         }
         else
         {

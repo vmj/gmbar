@@ -89,6 +89,8 @@ void             gmbar_set_section_width      (gmsection* section,
 
 int              gmbar_format                 (gmbar* bar,
                                                unsigned int nl,
-                                               char** buf);
+                                               char** buf,
+                                               int* len,
+                                               int* max);
 
 #endif // LIBGMBAR_H
