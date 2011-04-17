@@ -199,28 +199,28 @@ parse_meminfo(const char* meminfo,
         err = parse_meminfo_field(meminfo, size, "MemTotal", total);
         if (err)
         {
-                log_error("Error parsing MemTotal: %d\n", err);
+                log_error("Error parsing MemTotal: %d", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, size, "MemFree", &free);
         if (err)
         {
-                log_error("Error parsing MemFree: %d\n", err);
+                log_error("Error parsing MemFree: %d", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, size, "Buffers", buffers);
         if (err)
         {
-                log_error("Error parsing Buffers: %d\n", err);
+                log_error("Error parsing Buffers: %d", err);
                 return err;
         }
 
         err = parse_meminfo_field(meminfo, size, "Cached", cached);
         if (err)
         {
-                log_error("Error parsing Cached: %d\n", err);
+                log_error("Error parsing Cached: %d", err);
                 return err;
         }
 

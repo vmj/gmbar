@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Os
+CFLAGS = -Wall -Os -D_GNU_SOURCE
 LDFLAGS =
 
 SOURCES = $(wildcard src/gm*bar.c)

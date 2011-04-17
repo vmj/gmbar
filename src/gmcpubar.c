@@ -302,7 +302,7 @@ parse_stat(const char* stat,
                 p = memstr(p, field, len);
                 if (!p)
                 {
-                        log_error("Field not found: %d\n", -1);
+                        log_error("Field not found: %d", -1);
                         return -1;
                 }
         } while (p != stat && p[-1] != '\n' && p++ && (len = size - (p - stat)));

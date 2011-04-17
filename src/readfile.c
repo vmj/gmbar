@@ -21,7 +21,7 @@ readfile(const char* filepath, char** data, unsigned int* size, unsigned int* ma
         if (fd == -1)
         {
                 err = errno;
-                log_error("Error opening file: %d\n", err);
+                log_error("Error opening file: %d", err);
         }
 
         while (!err && bytes != 0)
@@ -35,7 +35,7 @@ readfile(const char* filepath, char** data, unsigned int* size, unsigned int* ma
                         {
                                 *max -= 1024;
                                 err = errno;
-                                log_error("Error allocating space for file contents: %d\n", err);
+                                log_error("Error allocating space for file contents: %d", err);
                                 break;
                         }
                         *data = tmp;
@@ -45,7 +45,7 @@ readfile(const char* filepath, char** data, unsigned int* size, unsigned int* ma
                 {
                 case -1:
                         err = errno;
-                        log_error("Error reading file: %d\n", err);
+                        log_error("Error reading file: %d", err);
                         break;
                 default:
                         *size += bytes;
@@ -59,7 +59,7 @@ readfile(const char* filepath, char** data, unsigned int* size, unsigned int* ma
                 if (fd == -1)
                 {
                         if (!err) err = errno;
-                        log_error("Error closing file: %d\n", errno);
+                        log_error("Error closing file: %d", errno);
                 }
         }
 
