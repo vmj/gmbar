@@ -64,6 +64,10 @@ struct gmbar {
         gmmargin margin;
         /** Bar paddings */
         gmmargin padding;
+        /** Segment width */
+        unsigned int segment_width;
+        /** Segment gap width */
+        unsigned int segment_gap;
         /** Number of sections */
         unsigned char nsections;
         /** List of sections */

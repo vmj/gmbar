@@ -33,6 +33,8 @@ enum {
         OPTION_LOG_FILE = 'L',
         OPTION_PREFIX = 'P',
         OPTION_SUFFIX = 'S',
+        OPTION_SEGMENT_WIDTH = 's',
+        OPTION_SEGMENT_GAP = 'g',
 };
 
 /* Common options */
@@ -57,6 +59,10 @@ static const struct argp_option common_options[] = {
           "Prefix to print before the bar"                      },
         { "suffix",     OPTION_SUFFIX,             "SUFFIX",    0,
           "Suffix to print after the bar"                       },
+        { "segment",    OPTION_SEGMENT_WIDTH,      "WIDTH",     0,
+          "Segment width in pixels"                             },
+        { "gap",        OPTION_SEGMENT_GAP,        "WIDTH",     0,
+          "Gap between segments, in pixels"                     },
         { 0 }
 };
 
@@ -151,6 +157,12 @@ handle_common_option(int key, char* arg, struct argp_state *state)
                 break;
         case OPTION_SUFFIX:
                 err = parse_option_arg_string(arg, &config->suffix);
+                break;
+        case OPTION_SEGMENT_WIDTH:
+                err = parse_option_arg_unsigned_int(arg, &config->bar->segment_width);
+                break;
+        case OPTION_SEGMENT_GAP:
+                err = parse_option_arg_unsigned_int(arg, &config->bar->segment_gap);
                 break;
 
         default:

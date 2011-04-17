@@ -202,6 +202,8 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
         /* number of pixels from the start of the first section to the
          * right margin */
         int width = bar_width - bar->padding.left + bar->margin.right;
+        int current_segment_width = 0;
+        int current_gap_width = 0;
 
         unsigned int i = 0;
         gmsection* section = NULL;
@@ -233,7 +235,7 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
                 }
 
                 /* draw the sections */
-                for (i = 0, section = NULL;
+                for (i = 0, section = NULL, current_segment_width = bar->segment_width, current_gap_width = bar->segment_gap;
                      i < bar->nsections && (section = bar->sections[i]) && *max - *len > 0;
                      i++, width -= section->width)
                 {
@@ -247,10 +249,72 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
                         }
                         else
                         {
-                                *len += snprintf(*buf + *len, *max - *len, "^fg(%s)^r(%ux%u)",
-                                                section->color,
-                                                section->width,
-                                                section_height);
+                                if (bar->segment_width == 0 || bar->segment_gap == 0)
+                                {
+                                        *len += snprintf(*buf + *len, *max - *len, "^fg(%s)^r(%ux%u)",
+                                                         section->color,
+                                                         section->width,
+                                                         section_height);
+                                }
+                                else
+                                {
+                                        int section_width = section->width;
+                                        *len += snprintf(*buf + *len, *max - *len, "^fg(%s)", section->color);
+                                        while (section_width > 0 && *max - *len > 0)
+                                        {
+                                                if (current_segment_width > 0)
+                                                {
+                                                        if (current_segment_width >= section_width)
+                                                        {
+                                                                *len += snprintf(*buf + *len, *max - *len,
+                                                                                 "^r(%ux%u)",
+                                                                                 section_width,
+                                                                                 section_height);
+                                                                current_segment_width -= section_width;
+                                                                section_width = 0;
+                                                                if (current_segment_width == 0)
+                                                                {
+                                                                        current_gap_width = bar->segment_gap;
+                                                                }
+
+                                                        }
+                                                        else
+                                                        {
+                                                                *len += snprintf(*buf + *len, *max - *len,
+                                                                                 "^r(%ux%u)",
+                                                                                 current_segment_width,
+                                                                                 section_height);
+                                                                section_width -= current_segment_width;
+                                                                current_segment_width = 0;
+                                                                current_gap_width = bar->segment_gap;
+                                                        }
+                                                }
+                                                else
+                                                {
+                                                        if (current_gap_width >= section_width)
+                                                        {
+                                                                *len += snprintf(*buf + *len, *max - *len,
+                                                                                 "^p(%u)",
+                                                                                 section_width);
+                                                                current_gap_width -= section_width;
+                                                                section_width = 0;
+                                                                if (current_gap_width == 0)
+                                                                {
+                                                                        current_segment_width = bar->segment_width;
+                                                                }
+                                                        }
+                                                        else
+                                                        {
+                                                                *len += snprintf(*buf + *len, *max - *len,
+                                                                                 "^p(%u)",
+                                                                                 current_gap_width);
+                                                                section_width -= current_gap_width;
+                                                                current_gap_width = 0;
+                                                                current_segment_width = bar->segment_width;
+                                                        }
+                                                }
+                                        }
+                                }
                         }
                 }
 
