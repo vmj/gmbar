@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "log.h"
 
@@ -63,12 +64,17 @@ int log_close()
 /**
  *
  */
-void log_error(char* frmt, int err)
+void log_error(char* frmt, ...)
 {
+        va_list argv;
         if (log)
         {
                 log_prefix();
-                fprintf(log, frmt, err);
+
+                va_start(argv, frmt);
+                vfprintf(log, frmt, argv);
+                va_end(argv);
+
                 log_suffix();
         }
 }
