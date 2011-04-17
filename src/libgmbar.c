@@ -208,7 +208,7 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
 
         do
         {
-                if (*len == *max)
+                if (*len >= *max)
                 {
                         tmp = realloc(*buf, *max + 1024);
                         if (!tmp)
