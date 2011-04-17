@@ -213,7 +213,6 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
                         if (!tmp)
                         {
                                 err = errno;
-                                log_error("Error allocating space for output: %d\n", err);
                                 break;
                         }
                         *max += 1024;

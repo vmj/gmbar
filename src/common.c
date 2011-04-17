@@ -285,7 +285,7 @@ print_bar(common_arguments* args)
         }
         else
         {
-                printf("^fg(red)^bg(black)OOF^bg()^fg()\n");
+                printf("^fg(red)^bg(black)%d^bg()^fg()\n", err);
         }
         fflush(stdout);
         return err;
