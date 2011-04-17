@@ -190,6 +190,7 @@ gmbar_set_section_width(gmsection* section, unsigned int total, unsigned int val
 int
 gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
 {
+        const int orig_len = *len;
         int err = 0;
         char* tmp = NULL;
         /* width of the bar without margins */
@@ -217,15 +218,19 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
                         }
                         *max += 1024;
                         *buf = tmp;
+                        *len = orig_len;
                 }
 
                 /* draw the outline and put position to start of the first section */
-                *len += snprintf(*buf, *max, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
-                                bar->margin.left,
-                                bar->color.fg,
-                                bar_width,
-                                bar->size.height - bar->margin.top - bar->margin.bottom,
-                                -bar_width + bar->padding.left);
+                if ( *max - *len > 0 )
+                {
+                        *len += snprintf(*buf + *len, *max - *len, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
+                                         bar->margin.left,
+                                         bar->color.fg,
+                                         bar_width,
+                                         bar->size.height - bar->margin.top - bar->margin.bottom,
+                                         -bar_width + bar->padding.left);
+                }
 
                 /* draw the sections */
                 for (i = 0, section = NULL;
