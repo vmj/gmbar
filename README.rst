@@ -17,18 +17,33 @@ The program gmmembar produces a system memory bar, showing how much
 memory is actively used, how much is used for file system buffers, and
 how much is cached.  Following shows a typical invocation::
 
-    $ gmmembar --interval=5 --logfile=gmmembar.log \
-               --width=100 --height=10 --margin=1 --padding=1 \
-               --fg=red --used=red --buffers=yellow --cached=orange
+    $ gmmembar --interval=5 --logfile=gmbar.log \
+               --width=100 --height=10 \
+               --margin=1 --padding=2 \
+               --fg=red --bg=none \
+               --used=red \
+               --buffers=orange \
+               --cached=yellow \
+               | dzen -x 15 -y 15 -w 100 -h 10
+
+.. image:: img/gmmembar.png
 
 The program gmcpubar produces a system CPU bar, showing how much CPU
 time is used in system, user, nice, and idle tasks.  Following shows a
 typical invocation::
 
-    $ gmcpubar --interval=1 --logfile=gmcpubar.log \
-               --width=100 --height=10 --margin=1 --padding=1 \
-               --fg=red --kern=red --user=orange --nice=yellow \
-               --idle=green
+    $ gmcpubar --interval=1 --logfile=gmbar.log \
+               --width=100 --height=10 \
+               --margin=1 --padding=0 \
+               --segment=1 --gap=1 \
+               --fg=none --bg="#444444" \
+               --kern=red \
+               --user=orange \
+               --nice=yellow \
+               --idle=none \
+               | dzen2 -x 15 -y 15 -w 100 -h 10
+
+.. image:: img/gmcpubar.png
 
 The included C library provides the ability to make custom graphical
 multibars easily easily.
