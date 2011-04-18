@@ -40,8 +40,8 @@ gmbar_new_with_defaults(unsigned int width, unsigned int height, char* fg, char*
         {
                 bar->size.width  = width;
                 bar->size.height = height;
-                bar->color.fg = strdup(fg);
-                bar->color.bg = strdup(bg);
+                bar->color.fg = strdup(fg ? fg : "none");
+                bar->color.bg = strdup(bg ? bg : "none");
                 if (!bar->color.fg || !bar->color.bg)
                 {
                         gmbar_free(bar);
@@ -223,15 +223,44 @@ gmbar_format(gmbar* bar, unsigned int nl, char** buf, int* len, int* max)
                         *len = orig_len;
                 }
 
-                /* draw the outline and put position to start of the first section */
+                /* draw the background, if not none */
+                if ( *max - *len > 0 && strcmp(bar->color.bg, "none") )
+                {
+                        *len += snprintf(*buf + *len, *max - *len, "^fg(%s)^r(%ux%u)^p(%d)",
+                                         bar->color.bg,
+                                         bar->size.width,
+                                         bar->size.height,
+                                         -bar->size.width);
+                }
+
+                /* ignore background for the rest of the drawing */
                 if ( *max - *len > 0 )
                 {
-                        *len += snprintf(*buf + *len, *max - *len, "^ib(1)^p(%u)^fg(%s)^ro(%ux%u)^p(%d)",
-                                         bar->margin.left,
+                        *len += snprintf(*buf + *len, *max - *len, "^ib(1)");
+                }
+
+                /* leave margin */
+                if ( *max - *len > 0 && bar->margin.left )
+                {
+                        *len += snprintf(*buf + *len, *max - *len, "^p(%d)",
+                                         bar->margin.left);
+                }
+
+                /* draw the outline, if color is not none */
+                if ( *max - *len > 0 && strcmp(bar->color.fg, "none") )
+                {
+                        *len += snprintf(*buf + *len, *max - *len, "^fg(%s)^ro(%ux%u)^p(%d)",
                                          bar->color.fg,
                                          bar_width,
                                          bar->size.height - bar->margin.top - bar->margin.bottom,
-                                         -bar_width + bar->padding.left);
+                                         -bar_width);
+                }
+
+                /* leave padding */
+                if ( *max - *len > 0 && bar->padding.left )
+                {
+                        *len += snprintf(*buf + *len, *max - *len, "^p(%d)",
+                                         bar->padding.left);
                 }
 
                 /* draw the sections */

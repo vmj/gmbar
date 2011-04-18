@@ -84,14 +84,14 @@ main(int argc, char** argv)
                 return -1;
         }
 
-        bar = gmbar_new_with_defaults(100, 10, "red", "#444444");
+        bar = gmbar_new_with_defaults(100, 10, "red", "none");
         if (!bar)
         {
                 buffer_free(stat);
                 return -1;
         }
 
-        err = gmbar_add_sections(bar, 4, "red", "orange", "yellow", "green");
+        err = gmbar_add_sections(bar, 4, "red", "orange", "yellow", "none");
         if (err)
         {
                 buffer_free(stat);

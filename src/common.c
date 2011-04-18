@@ -46,7 +46,7 @@ static const struct argp_option common_options[] = {
         { "fg",         OPTION_FOREGROUND_COLOR,   "COLOR",     0,
           "Foreground color of the bar (the outline color)"     },
         { "bg",         OPTION_BACKGROUND_COLOR,   "COLOR",     0,
-          "Background color of the bar (not used at the moment)"},
+          "Background color of the whole bar"                   },
         { "margin",     OPTION_MARGIN,             "MARGIN",    0,
           "Margin size in pixels, all four sides"               },
         { "padding",    OPTION_PADDING,            "PADDING",   0,
