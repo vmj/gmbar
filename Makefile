@@ -33,7 +33,20 @@ bin/%: src/%.c src/libgmbar.o src/common.o src/readfile.o src/log.o src/buffer.o
 	$(CC) $(LDFLAGS) -o $@ src/$*.o src/common.o src/readfile.o src/log.o src/libgmbar.o src/buffer.o
 
 clean:
-	-@rm *~ src/*~ src/*.o 2>/dev/null
+	-@rm *~ src/*~ src/*.o 2>/dev/null || true
 
 distclean: clean
-	-@rm -rf $(TARGETS) 2>/dev/null
+	-@rm -rf $(TARGETS) 2>/dev/null || true
+
+doc:
+	@rst2html.py README.rst index.html
+
+dist: distclean doc
+	@$(MAKE) -s dist-internal VERSION=`grep _version src/version.h |sed -e 's/.* "//' -e 's/";//'`
+
+dist-internal:
+	-@rm -rf gmbar-$(VERSION) gmbar-$(VERSION).tar.gz 2>/dev/null || true
+	@mkdir gmbar-$(VERSION)
+	@cp -r LICENSE.txt Makefile README.rst img src gmbar-$(VERSION)/
+	@tar czf gmbar-$(VERSION).tar.gz gmbar-$(VERSION)
+	@rm -rf gmbar-$(VERSION)
