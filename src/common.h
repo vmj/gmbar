@@ -5,6 +5,7 @@
 #define COMMON_H
 
 int parse_option_arg_unsigned_int(char* arg, unsigned int* val);
+int parse_option_arg_double(char* arg, double* val);
 int parse_option_arg_unsigned_char(char* arg, unsigned char* val);
 int parse_option_arg_string(char* arg, char** str);
 

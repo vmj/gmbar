@@ -68,6 +68,10 @@ struct gmbar {
         unsigned int segment_width;
         /** Segment gap width */
         unsigned int segment_gap;
+        /** Section width granularity */
+        unsigned int granularity;
+        /** Section width rounding */
+        double rounding;
         /** Number of sections */
         unsigned char nsections;
         /** List of sections */

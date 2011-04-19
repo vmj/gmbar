@@ -174,7 +174,20 @@ gmbar_set_section_width(gmsection* section, unsigned int total, unsigned int val
         unsigned int inner_width = (unsigned int) (bar->size.width
                                                    - bar->margin.left - bar->margin.right
                                                    - bar->padding.left - bar->padding.right);
-        section->width = inner_width * ((double)value / total);
+        double width = inner_width * ((double)value / total);
+        if (bar->granularity > 0)
+        {
+                if (bar->rounding == 0)
+                {
+                        width += (double)bar->granularity/2;
+                }
+                else
+                {
+                        width += bar->rounding;
+                }
+                width = (int)width/bar->granularity * bar->granularity;
+        }
+        section->width = width;
 }
 
 /**

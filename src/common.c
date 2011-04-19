@@ -35,6 +35,8 @@ enum {
         OPTION_SUFFIX = 'S',
         OPTION_SEGMENT_WIDTH = 's',
         OPTION_SEGMENT_GAP = 'g',
+        OPTION_GRANULARITY = 'G',
+        OPTION_ROUNDING = 'R',
 };
 
 /* Common options */
@@ -63,6 +65,10 @@ static const struct argp_option common_options[] = {
           "Segment width in pixels"                             },
         { "gap",        OPTION_SEGMENT_GAP,        "WIDTH",     0,
           "Gap between segments, in pixels"                     },
+        { "granularity", OPTION_GRANULARITY,       "WIDTH",     0,
+          "Granularity of sections, in pixels"                  },
+        { "rounding",   OPTION_ROUNDING,           "WIDTH",     0,
+          "Rounding point for sections (default: half of granularity)" },
         { 0 }
 };
 
@@ -164,6 +170,12 @@ handle_common_option(int key, char* arg, struct argp_state *state)
         case OPTION_SEGMENT_GAP:
                 err = parse_option_arg_unsigned_int(arg, &config->bar->segment_gap);
                 break;
+        case OPTION_GRANULARITY:
+                err = parse_option_arg_unsigned_int(arg, &config->bar->granularity);
+                break;
+        case OPTION_ROUNDING:
+                err = parse_option_arg_double(arg, &config->bar->rounding);
+                break;
 
         default:
                 err = ARGP_ERR_UNKNOWN;
@@ -189,6 +201,20 @@ parse_option_arg_unsigned_int(char* arg, unsigned int* value)
                 arg++;
         while(isdigit(*arg))
                 *value = *value * 10 + (*arg++ - '0');
+        return 0;
+}
+
+/**
+ * Parse argument as double
+ *
+ * @param   arg   Argument
+ * @param   val   On return, points to the parsed value
+ * @return  Zero (no error detection).
+ */
+int
+parse_option_arg_double(char* arg, double* value)
+{
+        *value = atof(arg);
         return 0;
 }
 
