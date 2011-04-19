@@ -4,7 +4,8 @@ gmbar -- Graphical multibar for dzen2
 gmbar provides a library and a set of programs for producing graphical
 multibars for dzen2.
 
-| Download: http://linuxbox.fi/~vmj/gmbar/
+| Homepage: http://linuxbox.fi/~vmj/gmbar/
+| Download: http://linuxbox.fi/~vmj/gmbar/archive/
 | Source code: http://github.com/vmj/gmbar
 
 .. contents::
