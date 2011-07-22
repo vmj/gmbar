@@ -60,8 +60,8 @@ portability.  Take this as a challenge.
 Installation
 ============
 
-Type 'make' and copy the 'bin/gm{mem,cpu}bar' to a convenient place,
-like ~/bin.
+Type 'make' and copy the 'src/gm{mem,cpu}bar' to a convenient place,
+like ~/bin.  Also, manual pages are available as 'doc/gm{mem,cpu}bar.1'.
 
 
 Authors

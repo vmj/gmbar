@@ -11,6 +11,8 @@ clean:
 distclean: clean
 	-@rm $(MAN) 2>/dev/null || true
 
+dist:
+
 man: $(MAN)
 
 %: %.xml
