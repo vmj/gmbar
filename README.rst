@@ -49,8 +49,8 @@ typical invocation::
 The included C library provides the ability to make custom graphical
 multibars easily easily.
 
-.. _gmmembar(1): http://www.linuxbox.fi/gmbar/gmmembar.1.html
-.. _gmcpubar(1): http://www.linuxbox.fi/gmbar/gmcpubar.1.html
+.. _gmmembar(1): http://www.linuxbox.fi/~vmj/gmbar/gmmembar.1.html
+.. _gmcpubar(1): http://www.linuxbox.fi/~vmj/gmbar/gmcpubar.1.html
 
 
 Requirements
