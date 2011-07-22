@@ -27,7 +27,7 @@ how much is cached.  Following shows a typical invocation::
                --cached=yellow \
                | dzen -x 15 -y 15 -w 100 -h 10
 
-.. image:: img/gmmembar.png
+.. image:: http://linuxbox.fi/~vmj/gmbar/img/gmmembar.png
 
 The program `gmcpubar(1)`_ produces a system CPU bar, showing how much CPU
 time is used in system, user, nice, and idle tasks.  Following shows a
@@ -44,7 +44,7 @@ typical invocation::
                --idle=none \
                | dzen2 -x 15 -y 15 -w 100 -h 10
 
-.. image:: img/gmcpubar.png
+.. image:: http://linuxbox.fi/~vmj/gmbar/img/gmcpubar.png
 
 The included C library provides the ability to make custom graphical
 multibars easily easily.
