@@ -1,3 +1,9 @@
+export
+DESTDIR ?=
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+MANDIR ?= $(PREFIX)/man
+MAN1DIR ?= $(MANDIR)/man1
 
 all: subdirs
 
@@ -9,6 +15,8 @@ distclean: subdirs clean
 dist: distclean index.html
 	@$(MAKE) -C doc -s all
 	@$(MAKE) -s dist-internal VERSION=`grep _version src/version.h |sed -e 's/.* "//' -e 's/";//'`
+
+install: subdirs
 
 index.html:
 	@rst2html.py README.rst index.html

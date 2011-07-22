@@ -1,3 +1,7 @@
+DESTDIR ?=
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
+
 CC = gcc
 CFLAGS = -Wall -Os -D_GNU_SOURCE
 LDFLAGS =
@@ -17,6 +21,10 @@ distclean: clean
 	-@rm -rf $(TOOLS) 2>/dev/null || true
 
 dist:
+
+install: $(TOOLS)
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp $(TOOLS) $(DESTDIR)$(BINDIR)/
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -o $@ -c $<

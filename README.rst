@@ -60,8 +60,12 @@ portability.  Take this as a challenge.
 Installation
 ============
 
-Type 'make' and copy the 'src/gm{mem,cpu}bar' to a convenient place,
-like ~/bin.  Also, manual pages are available as 'doc/gm{mem,cpu}bar.1'.
+Type 'make install' to install the tools into '/usr/local/bin' and
+manual pages to '/usr/local/man'.
+
+You can also define PREFIX to install gmbar in a different prefix:
+'make PREFIX=/usr' for example.  Similarly, there's DESTDIR, BINDIR,
+MANDIR, and MAN1DIR for those who need them.
 
 
 Authors
