@@ -1,0 +1,141 @@
+gmmembar(1)
+===========
+
+NAME
+----
+gmmembar - Graphical memory bar for Dzen2
+
+SYNOPSIS
+--------
+[verse]
+'gmmembar' [common options] [color options]
+
+DESCRIPTION
+-----------
+gmmembar produces memory bar for Dzen2.  Many options can be used to tweak how exactly it should look.
+
+OPTIONS
+-------
+Color options for gmmember.
+
+-a COLOR::
+--used=COLOR::
+        Color for the used section.
+
+-b COLOR::
+--buffers=COLOR::
+        Color for the file system buffers section.
+
+-c COLOR::
+--cached=COLOR::
+        Color for the cached section.
+
+Common options for all gm*bar commands.
+
+-F COLOR::
+--fg=COLOR::
+        The outline color.  Default is "red".  If this is "none", outline is not drawn.
+
+-B COLOR::
+--bg=COLOR::
+        The background color.  Default is "none" which means that background is not drawn.
+
+-m PIXELS::
+--margin=PIXELS::
+        Number of pixels to leave between the edge of the window and the outline (which may be invisible).
+        +
+        Default is zero.  I.e. the outline resides directly next to window edges.
+
+-p PIXELS::
+--padding=PIXELS::
+        Number of pixels to leave between outline (which may be invisible) and the sections of the bar.
+        +
+        Note that the padding is counted from "outer edge" of the outline.  This is deliberate to make it possible to draw the sections directly next to window edge by leaving both margin and padding to zero.
+        +
+        Padding defaults to zero.
+
+-w PIXELS::
+--width=PIXELS::
+        Width of the bar in pixels.  This includes margins and paddings.
+
+-h PIXELS::
+--height=PIXELS::
+        Height of the bar in pixels.  This includes margins and paddings.
+
+-i SECONDS::
+--interval=SECONDS::
+        How ofter to refresh the bar, in seconds.
+
+-L FILE::
+--logfile=FILE::
+        The name of the file for diagnostic messages.
+        +
+        Note that you can use same log file for multiple instances of gm*bar commands.
+
+-P TEXT::
+--prefix=TEXT::
+        A snippet of text to output in front of the bar.
+        +
+        Note that you will have to take the width of the text into account when specifying window width for dzen2, but do not include the text width into --width above.
+
+-S TEXT::
+--suffix=TEXT::
+        A snippet of text to output after the bar.
+        +
+        Note that you will have to take the width of the text into account when specifying window width for dzen2, but do not include the text width into --width above.
+
+-s PIXELS::
+--segment=PIXELS::
+        This option, together with --gap, enables segmented drawing.  Both --segment and --gap must be greater than zero for this to make sense.
+        +
+        The default is to draw the sections in a continuous bar.
+        +
+        In segmented drawing, the sections are chopped into segments.  Note the the sections can end between segments or mid-segments, i.e. a color change can happen anywhere regardless of segments.
+        +
+        This option specifies the pixel width of a single segment.
+
+-g PIXELS::
+--gap=PIXELS::
+        This option specifies how many pixels to leave between segments.  (See --segment.)
+
+-G PIXELS::
+--granularity=PIXELS::
+        This specifies how many pixels at a time the sections grow or shrink.
+        +
+        The default zero has a special meaning: when calculating the section width, the width is always rounded down to even pixel width.  For example, if a section would occupy 50.9% of a 100 pixels, it would be rounded to 50 pixels.
+        +
+        By specifying granularity, the behaviour changes so that a more natural rounding is used.  In the preceding example, with --granularity=1, the width would become 51 pixels.  See --rounding below for more examples.
+        +
+        This option can be useful with --segment and --gap if you do not want the section to ever change in middle of a segment.  In this case, you would specify segment width N, gap width M, and granularity N+M.
+
+-R FLOAT::
+--rounding=FLOAT::
+        When using --granularity, this specifies how the rounding should behave.  Without --granularity this has no effect.
+        +
+        For example, if you specify granularity to be 5 pixels and rounding to be 3, then a section with actual width 2 would be rounded to 5, while a section with actual width 1.999 would be rounded to zero.
+        +
+        The default rounding is half the granularity, which gives you the natural rounding (2.4 becomes 0, 2.5 becomes 5, in above example).
+
+-V::
+--version::
+        Print version and exit with zero status.
+
+--usage::
+        Print usage and exit with zero status.
+
+--help::
+        Print help and exit with zero status.
+
+FILES
+-----
+
+/proc/meminfo::
+        The source of memory usage information.
+
+AUTHOR
+------
+Original author and current maintainer: mailto:vmj@linuxbox.fi[Mikko Värri].
+
+COPYRIGHT
+---------
+GNU GPLv3
