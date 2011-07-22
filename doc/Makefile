@@ -44,7 +44,7 @@ html: $(HTML)
 #	mkdir -p $(DESTDIR)$(DOCDIR)
 #	cp $(HTML) $(DESTDIR)$(DOCDIR)/
 
-index.html:
+index.html: ../README.rst
 	rst2html.py ../README.rst index.html
 
 %.html: %.txt
