@@ -14,7 +14,7 @@ multibars for dzen2.
 Basic usage
 ===========
 
-The program gmmembar produces a system memory bar, showing how much
+The program `gmmembar(1)`_ produces a system memory bar, showing how much
 memory is actively used, how much is used for file system buffers, and
 how much is cached.  Following shows a typical invocation::
 
@@ -29,7 +29,7 @@ how much is cached.  Following shows a typical invocation::
 
 .. image:: img/gmmembar.png
 
-The program gmcpubar produces a system CPU bar, showing how much CPU
+The program `gmcpubar(1)`_ produces a system CPU bar, showing how much CPU
 time is used in system, user, nice, and idle tasks.  Following shows a
 typical invocation::
 
@@ -48,6 +48,9 @@ typical invocation::
 
 The included C library provides the ability to make custom graphical
 multibars easily easily.
+
+.. _gmmembar(1): http://www.linuxbox.fi/gmbar/gmmembar.1.html
+.. _gmcpubar(1): http://www.linuxbox.fi/gmbar/gmcpubar.1.html
 
 
 Requirements
