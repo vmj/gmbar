@@ -8,7 +8,7 @@ gmcpubar - Graphical CPU bar for Dzen2
 SYNOPSIS
 --------
 [verse]
-'gmcpubar' [common options] [color options]
+'gmcpubar' [common options] [color options] [-f|--cpu=INDEX]
 
 DESCRIPTION
 -----------
@@ -16,7 +16,15 @@ gmcpubar produces CPU bar for Dzen2.  Many options can be used to tweak how exac
 
 OPTIONS
 -------
-Color options for gmmember.
+Options for gmcpubar.
+
+-f INDEX::
+--cpu=INDEX::
+        Index of the processor to watch.
+        +
+        If this is not specified, the bar shows overall CPU usage.  If this is specified, then a single logical processor usage is shown.
+
+Color options for gmcpubar.
 
 -a COLOR::
 --kern=COLOR::
