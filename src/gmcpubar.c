@@ -9,11 +9,15 @@
 #include "buffer.h"
 #include "version.h"
 
+/* Maximum length of a CPU field label in /proc/stat ('cpu[CPU_INDEX] ') */
+#define MAX_CPU_FIELD_LEN 20
+
 /* Static functions */
 static error_t handle_option(int key,
                              char* arg,
                              struct argp_state *state);
 static int get_stat(buffer* stat,
+                    const char* field,
                     unsigned int *kern,
                     unsigned int *user,
                     unsigned int *nice,
@@ -38,6 +42,7 @@ enum {
         OPTION_USER_COLOR = 'b',
         OPTION_NICE_COLOR = 'c',
         OPTION_IDLE_COLOR = 'd',
+        OPTION_CPU_INDEX  = 'f',
 };
 
 
@@ -45,6 +50,7 @@ enum {
 typedef struct arguments arguments;
 struct arguments {
         common_arguments common_config;
+        int cpu_index;
 };
 
 /* Options */
@@ -57,6 +63,8 @@ static struct argp_option options[] = {
           "Color for the nice portion of the bar"               },
         { "idle",       OPTION_IDLE_COLOR,         "COLOR",     0,
           "Color for the idle portion of the bar"               },
+        { "cpu",        OPTION_CPU_INDEX,          "INDEX",     0,
+          "Index of the processor to watch"                     },
         { 0 }
 };
 
@@ -72,6 +80,7 @@ main(int argc, char** argv)
         int err = 0;
         long total; // Number of clock ticks per second
         long num_cpus;
+        char cpu_field[MAX_CPU_FIELD_LEN + 1];
         unsigned int _kern, _user, _nice, _idle;
         unsigned int kern, user, nice, idle;
         arguments config;
@@ -99,6 +108,7 @@ main(int argc, char** argv)
                 return -1;
         }
 
+        config.cpu_index = -1;
         config.common_config.bar = bar;
         config.common_config.interval = 15;
         config.common_config.prefix = NULL;
@@ -122,9 +132,19 @@ main(int argc, char** argv)
                 gmbar_free(bar);
                 return num_cpus;
         }
+        if (config.cpu_index >= 0
+            && config.cpu_index <= CHAR_MAX
+            && config.cpu_index < num_cpus)
+        {
+                snprintf(cpu_field, MAX_CPU_FIELD_LEN, "cpu%i ", config.cpu_index);
+        }
+        else
+        {
+                snprintf(cpu_field, MAX_CPU_FIELD_LEN, "cpu ");
+        }
 
         /* Initialize history */
-        err = get_stat(stat, &_kern, &_user, &_nice, &_idle);
+        err = get_stat(stat, cpu_field, &_kern, &_user, &_nice, &_idle);
         if (err)
         {
                 buffer_free(stat);
@@ -136,7 +156,7 @@ main(int argc, char** argv)
         {
                 sleep(config.common_config.interval);
 
-                err = get_stat(stat, &kern, &user, &nice, &idle);
+                err = get_stat(stat, cpu_field, &kern, &user, &nice, &idle);
                 if (err)
                 {
                         buffer_free(stat);
@@ -193,6 +213,9 @@ handle_option(int key, char* arg, struct argp_state *state)
         case OPTION_IDLE_COLOR:
                 err = parse_option_arg_string(arg, &config->common_config.bar->sections[3]->color);
                 break;
+        case OPTION_CPU_INDEX:
+                config->cpu_index = parse_unsigned_int(arg, NULL);
+                break;
 
         default:
                 err = ARGP_ERR_UNKNOWN;
@@ -204,6 +227,7 @@ handle_option(int key, char* arg, struct argp_state *state)
 
 static int
 get_stat(buffer* stat,
+         const char* field,
          unsigned int *kern,
          unsigned int *user,
          unsigned int *nice,
@@ -222,7 +246,7 @@ get_stat(buffer* stat,
                 return err;
         }
 
-        err = parse_stat(stat->buf, stat->len, "cpu ", kern, user, nice, idle);
+        err = parse_stat(stat->buf, stat->len, field, kern, user, nice, idle);
         return err;
 }
 
