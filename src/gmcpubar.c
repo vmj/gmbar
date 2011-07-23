@@ -32,7 +32,7 @@ static unsigned int parse_unsigned_int(const char* str,
                                        const char** end);
 
 
-/* Argp option keys */
+/* Argp option keys (available: 'a'-'f') */
 enum {
         OPTION_KERN_COLOR = 'a',
         OPTION_USER_COLOR = 'b',

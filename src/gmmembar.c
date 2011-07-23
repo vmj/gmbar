@@ -30,7 +30,7 @@ static int parse_meminfo_field(const char* meminfo,
                                unsigned int *value);
 static unsigned int parse_unsigned_int(const char* str);
 
-/* Argp option keys */
+/* Argp option keys (available: 'a'-'f') */
 enum {
         OPTION_USED_COLOR = 'a',
         OPTION_BUFFERS_COLOR = 'b',

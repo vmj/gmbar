@@ -12,7 +12,7 @@ static error_t handle_common_option(int key,
 
 /* Common argp option keys */
 enum {
-        /* */
+        /* Not supported by Dzen2 */
         OPTION_MARGIN_TOP = 0,
         OPTION_MARGIN_RIGHT = 1,
         OPTION_MARGIN_BOTTOM = 2,
@@ -22,7 +22,7 @@ enum {
         OPTION_PADDING_BOTTOM = 6,
         OPTION_PADDING_LEFT = 7,
 
-        /* */
+        /* Preserved: 'g'-'z' and 'A'-'Z' */
         OPTION_WIDTH = 'w',
         OPTION_HEIGHT = 'h',
         OPTION_FOREGROUND_COLOR = 'F',
