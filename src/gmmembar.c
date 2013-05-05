@@ -224,7 +224,7 @@ parse_meminfo(const char* meminfo,
                 return err;
         }
 
-        *used = *total - (free + *buffers + *cached);
+        *used = *total - free;
 
         return err;
 }
@@ -270,9 +270,6 @@ parse_meminfo_field(const char* meminfo,
 
         /* Parse the digits (base ten value) */
         *value = parse_unsigned_int(p);
-
-        /* meminfo is in kilobytes (KiB) */
-        *value = *value * 1024;
 
         return 0;
 }
