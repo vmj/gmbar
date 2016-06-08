@@ -27,7 +27,7 @@ $ gmmembar --interval=5 --logfile=gmbar.log \
            | dzen -x 15 -y 15 -w 100 -h 10
 ----
 
-.. image:: http://linuxbox.fi/~vmj/gmbar/img/gmmembar.png
+image::http://linuxbox.fi/~vmj/gmbar/img/gmmembar.png[]
 
 The program http://www.linuxbox.fi/~vmj/gmbar/gmcpubar.1.html[gmcpubar(1)]
 produces a system CPU bar, showing how much CPU time is used in system,
@@ -46,7 +46,7 @@ $ gmcpubar --interval=1 --logfile=gmbar.log \
            | dzen2 -x 15 -y 15 -w 100 -h 10
 ----
 
-.. image:: http://linuxbox.fi/~vmj/gmbar/img/gmcpubar.png
+image::http://linuxbox.fi/~vmj/gmbar/img/gmcpubar.png[]
 
 The included C library provides the ability to make custom graphical
 multibars easily easily.
