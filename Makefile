@@ -21,7 +21,7 @@ install: subdirs
 dist-internal:
 	-@rm -rf gmbar-$(VERSION) gmbar-$(VERSION).tar.gz 2>/dev/null || true
 	@mkdir gmbar-$(VERSION)
-	@cp -r LICENSE.txt Makefile README.rst doc src gmbar-$(VERSION)/
+	@cp -r LICENSE.txt Makefile README.adoc doc src gmbar-$(VERSION)/
 	@tar czf gmbar-$(VERSION).tar.gz gmbar-$(VERSION)
 	@rm -rf gmbar-$(VERSION)
 
