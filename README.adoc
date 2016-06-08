@@ -53,8 +53,11 @@ multibars easily easily.
 
 == Requirements
 
-GNU Make and C libraries on Linux.  No attempt has been made towards
-portability.  Take this as a challenge.
+At runtime, GNU C libraries on Linux.
+
+To compile, GNU Make, AsciiDoc, and xmlto are required.
+On Debian based systems, you can install `asciidoc` and `xmlto` packages.
+On Slackware, `linuxdoc-tools` contains both the `asciidoc` and `xmlto` tools.
 
 == Installation
 
